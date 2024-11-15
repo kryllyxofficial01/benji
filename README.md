@@ -1,2 +1,3 @@
-# server-manager-daemon
-daemon to handle connections between devices on a server
+# server-manager
+
+meant to handle connections between various devices on my server, either windows or linux
