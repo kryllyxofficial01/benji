@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "service_manager.hpp"
+#include "server.hpp"
 
 int main(int argc, char** argv) {
     SERVICE_TABLE_ENTRY service_table[] = {
