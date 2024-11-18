@@ -1,28 +1,5 @@
 #include "server.hpp"
 
-#pragma comment(lib, "ws2_32.lib")
-
-int main() {
-    winsock_init();
-
-    nlohmann::json json = {
-        {"test", 19},
-        {"tset", 17}
-    };
-    std::string json_string = json.dump();
-
-    SOCKET _socket = create_socket();
-
-    server_connect("127.0.0.1", 8080, _socket);
-
-    send(_socket, json_string.c_str(), json_string.size(), 0);
-
-    closesocket(_socket);
-    WSACleanup();
-
-    return EXIT_SUCCESS;
-}
-
 void winsock_init() {
     WSAData wsa_data;
 
@@ -75,4 +52,15 @@ sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
     std::cout << "Success" << std::endl;
 
     return server;
+}
+
+std::string json_data_to_post_request(std::string data) {
+    std::string request = "POST / HTTP/1.1\r\n";
+    request += "Host: localhost:8080\r\n";
+    request += "Content-Type: application/json\r\n";
+    request += "Content-Length: " + std::to_string(data.length()) + "\r\n";
+    request += "Connection: close\r\n\r\n";
+    request += data;
+
+    return request;
 }
