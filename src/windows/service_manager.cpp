@@ -1,6 +1,6 @@
-#include "service_manager.hpp"
+#include "include/service_manager.hpp"
 
-void service_main(int argc, char** argv) {
+void WINAPI service_main(int argc, char** argv) {
     service.status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     service.status.dwCurrentState = SERVICE_START_PENDING;
     service.status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
@@ -21,11 +21,11 @@ void service_main(int argc, char** argv) {
         return;
     }
 
-    nlohmann::json json = {
-        {"test", 19},
-        {"tset", 17}
+    std::map<std::string, std::string> json_data = {
+        {"test", "17"},
+        {"tset", "19"}
     };
-    std::string json_string = json.dump();
+    std::string json_string = serialize_map(json_data);
 
     server_config.ip = "127.0.0.1";
     server_config.port = 8080;
@@ -34,39 +34,49 @@ void service_main(int argc, char** argv) {
 
     server_connect(server_config.ip, server_config.port, server_config._socket);
 
-    service.status.dwCurrentState = SERVICE_RUNNING;
-    SetServiceStatus(service.status_handle, &service.status);
+    report_service_status(SERVICE_RUNNING, NO_ERROR, 0);
 
-    std::string request;
-    while (service.status.dwCurrentState == SERVICE_RUNNING) {
-        request = json_data_to_post_request(json_string);
+    std::string request = json_data_to_post_request(json_string);
+    send(server_config._socket, request.c_str(), request.size(), 0);
 
-        send(server_config._socket, request.c_str(), request.size(), 0);
+    boolean running = true;
+    while (running) {
+        json_data["test"] = std::to_string(stoi(json_data["test"]) + 1);
+        json_string = serialize_map(json_data);
+
+        OutputDebugStringA(json_string.c_str());
 
         Sleep(1000);
-
-        service.status.dwCurrentState = SERVICE_RUNNING;
-        SetServiceStatus(service.status_handle, &service.status);
     }
 }
 
-void control_handler(DWORD request) {
+void WINAPI control_handler(DWORD request) {
     switch (request) {
         case SERVICE_CONTROL_STOP:
         case SERVICE_CONTROL_SHUTDOWN: {
-            service.status.dwCurrentState = SERVICE_STOP_PENDING;
-            SetServiceStatus(service.status_handle, &service.status);
+            report_service_status(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
             // cleanup
             closesocket(server_config._socket);
             WSACleanup();
 
-            service.status.dwCurrentState = SERVICE_STOPPED;
-            SetServiceStatus(service.status_handle, &service.status);
+            report_service_status(SERVICE_STOPPED, NO_ERROR, 0);
 
             break;
         }
 
-        default: break;
+        default: {
+            report_service_status(service.status.dwCurrentState, NO_ERROR, 0);
+
+            break;
+        }
     }
+}
+
+void report_service_status(DWORD current_state, DWORD exit_code, DWORD wait_hint) {
+    service.status.dwCurrentState = current_state;
+    service.status.dwWin32ExitCode = exit_code;
+    service.status.dwWaitHint = wait_hint;
+
+    SetServiceStatus(service.status_handle, &service.status);
 }

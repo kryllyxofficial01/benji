@@ -1,4 +1,4 @@
-#include "server.hpp"
+#include "include/server.hpp"
 
 void winsock_init() {
     WSAData wsa_data;

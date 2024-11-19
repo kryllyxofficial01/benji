@@ -6,8 +6,7 @@
 #include <iostream>
 
 #include "server.hpp"
-
-#include <windows.h>
+#include "utils.hpp"
 
 struct {
     SERVICE_STATUS status;
@@ -20,7 +19,9 @@ struct {
     SOCKET _socket;
 } server_config;
 
-void service_main(int argc, char** argv);
-void control_handler(DWORD request);
+void WINAPI service_main(int argc, char** argv);
+void WINAPI control_handler(DWORD request);
+
+void report_service_status(DWORD current_state, DWORD exit_code, DWORD wait_hint);
 
 #endif

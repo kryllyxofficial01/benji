@@ -9,6 +9,9 @@ class Handler(BaseHTTPRequestHandler):
 
         print("Received POST data:", data)
 
+        self.send_response(200)
+        self.end_headers()
+
 if __name__ == '__main__':
     server_address = ('127.0.0.1', 8080)
     httpd = HTTPServer(server_address, Handler)
