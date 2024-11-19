@@ -59,7 +59,7 @@ std::string json_data_to_post_request(std::string data) {
     request += "Host: localhost:8080\r\n";
     request += "Content-Type: application/json\r\n";
     request += "Content-Length: " + std::to_string(data.length()) + "\r\n";
-    request += "Connection: keep-alive\r\n\r\n";
+    request += "Connection: close\r\n\r\n";
     request += data;
 
     return request;
