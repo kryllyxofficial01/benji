@@ -21,12 +21,6 @@ void WINAPI service_main(int argc, char** argv) {
         return;
     }
 
-    std::map<std::string, std::string> json_data = {
-        {"test", "17"},
-        {"tset", "19"}
-    };
-    std::string json_string = serialize_map(json_data);
-
     server_config.ip = "127.0.0.1";
     server_config.port = 8080;
 
@@ -36,20 +30,9 @@ void WINAPI service_main(int argc, char** argv) {
 
     report_service_status(SERVICE_RUNNING, NO_ERROR, 0);
 
-    std::string request = json_data_to_post_request(json_string);
-    send(server_config._socket, request.c_str(), request.size(), 0);
-
     boolean running = true;
     while (running) {
-        json_data["test"] = std::to_string(stoi(json_data["test"]) + 1);
-        json_string = serialize_map(json_data);
-
-        OutputDebugStringA(json_string.c_str());
-
-        request = json_data_to_post_request(json_string);
-        send(server_config._socket, request.c_str(), request.size(), 0);
-
-        Sleep(5000);
+        Sleep(1000); // TODO: make this a configurable value, will be the update period for the main dashboard
     }
 }
 

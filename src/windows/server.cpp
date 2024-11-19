@@ -54,13 +54,20 @@ sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
     return server;
 }
 
-std::string json_data_to_post_request(std::string data) {
+void send_json_data(SOCKET _socket, JSON data) {
+    std::string request = json_data_to_post_request(data);
+    send(_socket, request.c_str(), request.size(), 0);
+}
+
+std::string json_data_to_post_request(JSON data) {
+    std::string data_string = serialize_json(data);
+
     std::string request = "POST / HTTP/1.1\r\n";
     request += "Host: localhost:8080\r\n";
     request += "Content-Type: application/json\r\n";
-    request += "Content-Length: " + std::to_string(data.length()) + "\r\n";
-    request += "Connection: close\r\n\r\n";
-    request += data;
+    request += "Content-Length: " + std::to_string(data_string.length()) + "\r\n";
+    request += "Connection: keep-alive\r\n\r\n";
+    request += data_string;
 
     return request;
 }

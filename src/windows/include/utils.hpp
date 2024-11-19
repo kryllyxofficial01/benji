@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
-std::string serialize_map(std::map<std::string, std::string> data);
+#define JSON std::map<std::string, std::string>
+
+std::string serialize_json(JSON data);
 
 #endif

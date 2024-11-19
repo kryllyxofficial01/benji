@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-std::string serialize_map(std::map<std::string, std::string> data) {
+std::string serialize_json(JSON data) {
     std::string serialized = "{";
 
     for (auto element: data) {
-        char* item;
-        sprintf(item, "\"%s\": \"%s\",", element.first.c_str(), element.second.c_str());
+        std::string key = "\"" + element.first + "\"";
+        std::string value = "\"" + element.second + "\"";
 
-        serialized += item;
+        serialized += key + ": " + value + ",";
     }
 
     serialized.at(serialized.length() - 1) = '}';

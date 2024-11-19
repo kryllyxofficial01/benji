@@ -8,10 +8,14 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 
+#include "utils.hpp"
+
 void winsock_init();
 SOCKET create_socket();
 sockaddr_in server_connect(const char* ip, int port, SOCKET _socket);
 
-std::string json_data_to_post_request(std::string data);
+void send_json_data(SOCKET _socket, JSON data);
+
+std::string json_data_to_post_request(JSON data);
 
 #endif
