@@ -49,7 +49,7 @@ void WINAPI service_main(int argc, char** argv) {
         request = json_data_to_post_request(json_string);
         send(server_config._socket, request.c_str(), request.size(), 0);
 
-        Sleep(1000);
+        Sleep(5000);
     }
 }
 
@@ -57,6 +57,8 @@ void WINAPI control_handler(DWORD request) {
     switch (request) {
         case SERVICE_CONTROL_STOP:
         case SERVICE_CONTROL_SHUTDOWN: {
+            OutputDebugStringA("Stopping service...");
+
             report_service_status(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
             // cleanup
@@ -64,6 +66,8 @@ void WINAPI control_handler(DWORD request) {
             WSACleanup();
 
             report_service_status(SERVICE_STOPPED, NO_ERROR, 0);
+
+            OutputDebugStringA("Stopped");
 
             break;
         }

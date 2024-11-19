@@ -3,30 +3,30 @@
 void winsock_init() {
     WSAData wsa_data;
 
-    std::cout << "Initializing Winsock..." << std::endl;
+    OutputDebugStringA("Initializing Winsock...");
 
     if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {
-        std::cerr << "WSAStartup failed" << std::endl;
+        OutputDebugStringA("Failed");
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << "Success" << std::endl;
+    OutputDebugStringA("Success");
 }
 
 SOCKET create_socket() {
-    std::cout << "Creating socket..." << std::endl;
+    OutputDebugStringA("Creating socket...");
 
     SOCKET _socket = socket(AF_INET, SOCK_STREAM, 0);
 
     if (_socket == INVALID_SOCKET) {
-        std::cerr << "Failed to create socket" << std::endl;
+        OutputDebugStringA("Failed");
 
         WSACleanup();
 
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << "Success" << std::endl;
+    OutputDebugStringA("Success");
 
     return _socket;
 }
@@ -34,14 +34,14 @@ SOCKET create_socket() {
 sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
     sockaddr_in server;
 
-    std::cout << "Connecting to server at " << ip << ":" << port << "..." << std::endl;
+    OutputDebugStringA((std::string("Connecting to server at ") + ip + ":" + std::to_string(port) + "...").c_str());
 
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
     inet_pton(AF_INET, ip, &server.sin_addr);
 
     if (connect(_socket, (sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
-        std::cerr << "Connection failed" << std::endl;
+        OutputDebugStringA("Failed");
 
         closesocket(_socket);
         WSACleanup();
@@ -49,7 +49,7 @@ sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << "Success" << std::endl;
+    OutputDebugStringA("Success");
 
     return server;
 }

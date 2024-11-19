@@ -15,6 +15,9 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     server_address = ('127.0.0.1', 8080)
+
     httpd = HTTPServer(server_address, Handler)
+
     print('Starting server...')
+
     httpd.serve_forever()
