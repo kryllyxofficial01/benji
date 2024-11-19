@@ -10,6 +10,7 @@ class Handler(BaseHTTPRequestHandler):
         print("Received POST data:", data)
 
         self.send_response(200)
+        self.send_header("Connection", "keep-alive")
         self.end_headers()
 
 if __name__ == '__main__':

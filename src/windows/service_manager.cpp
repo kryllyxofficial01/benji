@@ -46,6 +46,9 @@ void WINAPI service_main(int argc, char** argv) {
 
         OutputDebugStringA(json_string.c_str());
 
+        request = json_data_to_post_request(json_string);
+        send(server_config._socket, request.c_str(), request.size(), 0);
+
         Sleep(1000);
     }
 }
