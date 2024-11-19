@@ -1,5 +1,5 @@
-#ifndef _SERVICE_MANAGER_HPP
-#define _SERVICE_MANAGER_HPP
+#ifndef _BENJI_SERVICE_MANAGER_HPP
+#define _BENJI_SERVICE_MANAGER_HPP
 
 #define UNICODE // i hate C sometimes
 
@@ -8,12 +8,12 @@
 #include "server.hpp"
 #include "utils.hpp"
 
-struct {
+struct BENJI_SERVICE_STATUS {
     SERVICE_STATUS status;
     SERVICE_STATUS_HANDLE status_handle;
 } service;
 
-struct {
+struct BENJI_SERVER_CONFIG {
     const char* ip;
     int port;
     SOCKET _socket;

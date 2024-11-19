@@ -12,7 +12,7 @@ void WINAPI service_main(int argc, char** argv) {
     service.status.dwWaitHint = 0;
 
     service.status_handle = RegisterServiceCtrlHandler(
-        TEXT("ServerManagerService"),
+        TEXT("BenjiService"),
         (LPHANDLER_FUNCTION) control_handler
     );
 

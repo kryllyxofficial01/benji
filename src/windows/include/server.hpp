@@ -1,5 +1,5 @@
-#ifndef _SERVER_HPP
-#define _SERVER_HPP
+#ifndef _BENJI_SERVER_HPP
+#define _BENJI_SERVER_HPP
 
 #pragma comment(lib, "ws2_32.lib")
 

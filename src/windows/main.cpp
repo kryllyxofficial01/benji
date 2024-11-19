@@ -2,13 +2,16 @@
 
 #include "include/service_manager.hpp"
 #include "include/utils.hpp"
+#include "include/system_info.hpp"
 
 int main(int argc, char** argv) {
     winsock_init();
 
+    std::cout << get_cpu_info() << std::endl;
+
     SERVICE_TABLE_ENTRY service_dispatch_table[] = {
         {
-            TEXT("ServerManagerService"),
+            TEXT("BenjiService"),
             (LPSERVICE_MAIN_FUNCTION) service_main
         },
         {NULL, NULL}

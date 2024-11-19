@@ -11,8 +11,8 @@ LINUX_SRC = $(wildcard src/linux/*.cpp)
 all: windows linux
 
 windows:
-	$(GXX) $(GXX_FLAGS) $(WINDOWS_SRC) -o $(BUILD)/server-manager-service $(LINKED_LIBS)
+	$(GXX) $(GXX_FLAGS) $(WINDOWS_SRC) -o $(BUILD)/benji-service $(LINKED_LIBS)
 
 linux:
 	mkdir -p $(BUILD)
-	$(GXX) $(GXX_FLAGS) $(LINUX_SRC) -o $(BUILD)/server-managerd
+	$(GXX) $(GXX_FLAGS) $(LINUX_SRC) -o $(BUILD)/benjid

@@ -1,3 +1,3 @@
-# server-manager
+# benji
 
-meant to handle connections between various devices on my server, either windows or linux
+Collects meta deta about the system (CPU info, current running processes, etc.) periodically and records it in JSON format to a configurable IP

@@ -1,5 +1,5 @@
-#ifndef _UTILS_HPP
-#define _UTILS_HPP
+#ifndef _BENJI_UTILS_HPP
+#define _BENJI_UTILS_HPP
 
 #include <string>
 #include <map>
