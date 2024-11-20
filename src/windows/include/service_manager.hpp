@@ -8,12 +8,12 @@
 #include "server.hpp"
 #include "utils.hpp"
 
-struct BENJI_SERVICE_STATUS {
+inline struct BENJI_SERVICE_STATUS {
     SERVICE_STATUS status;
     SERVICE_STATUS_HANDLE status_handle;
 } service;
 
-struct BENJI_SERVER_CONFIG {
+inline struct BENJI_SERVER_CONFIG {
     const char* ip;
     int port;
     SOCKET _socket;
