@@ -18,6 +18,11 @@ void WINAPI service_main(int argc, char** argv) {
         return;
     }
 
+    JSON data = {
+        {"test", "19"},
+        {"tset", "17"}
+    };
+
     server_config.ip = "127.0.0.1";
     server_config.port = 8080;
 
@@ -26,8 +31,6 @@ void WINAPI service_main(int argc, char** argv) {
     server_connect(server_config.ip, server_config.port, server_config._socket);
 
     report_service_status(SERVICE_RUNNING, 0, 0);
-
-    LogDebug(get_cpu_name().c_str());
 
     boolean running = true;
     while (running) {
