@@ -6,7 +6,7 @@ void WINAPI service_main(int argc, char** argv) {
     service.status.dwServiceSpecificExitCode = 0;
     service.status.dwCheckPoint = 0;
 
-    report_service_status(SERVICE_START_PENDING, NO_ERROR, 0);
+    report_service_status(SERVICE_START_PENDING, 0, 0);
 
     service.status_handle = RegisterServiceCtrlHandler(
         TEXT("BenjiService"),
@@ -25,9 +25,9 @@ void WINAPI service_main(int argc, char** argv) {
 
     server_connect(server_config.ip, server_config.port, server_config._socket);
 
-    report_service_status(SERVICE_RUNNING, NO_ERROR, 0);
+    report_service_status(SERVICE_RUNNING, 0, 0);
 
-    OutputDebugStringA(get_cpu_name().c_str());
+    LogDebug(get_cpu_name().c_str());
 
     boolean running = true;
     while (running) {
@@ -39,26 +39,22 @@ void WINAPI control_handler(DWORD request) {
     switch (request) {
         case SERVICE_CONTROL_STOP:
         case SERVICE_CONTROL_SHUTDOWN: {
-            OutputDebugStringA("Stopping BenjiService...");
+            LogInfo("Stopping BenjiService...");
 
-            report_service_status(SERVICE_STOP_PENDING, NO_ERROR, 0);
+            report_service_status(SERVICE_STOP_PENDING, 0, 0);
 
             // cleanup
-            OutputDebugStringA("Closing socket...");
-            closesocket(server_config._socket);
+            server_cleanup(server_config._socket);
 
-            OutputDebugStringA("Cleaning up Winsock...");
-            WSACleanup();
+            report_service_status(SERVICE_STOPPED, 0, 0);
 
-            report_service_status(SERVICE_STOPPED, NO_ERROR, 0);
-
-            OutputDebugStringA("BenjiService stopped");
+            LogInfo("BenjiService stopped");
 
             break;
         }
 
         default: {
-            report_service_status(service.status.dwCurrentState, NO_ERROR, 0);
+            report_service_status(service.status.dwCurrentState, 0, 0);
 
             break;
         }

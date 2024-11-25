@@ -6,8 +6,9 @@
 #include <iostream>
 
 #include "server.hpp"
-#include "utils.hpp"
 #include "system_info.hpp"
+#include "utils.hpp"
+#include "logger.hpp"
 
 inline struct BENJI_SERVICE_STATUS {
     SERVICE_STATUS status;

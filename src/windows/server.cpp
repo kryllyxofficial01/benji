@@ -3,30 +3,33 @@
 void winsock_init() {
     WSAData wsa_data;
 
-    OutputDebugStringA("Initializing Winsock...");
+    LogInfo("Initializing Winsock...");
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {
-        OutputDebugStringA("Failed");
+    int winsock_init_code = WSAStartup(MAKEWORD(2, 2), &wsa_data);
+
+    if (winsock_init_code != 0) {
+        LogCritical(std::string("Init failed with error code ") + std::to_string(winsock_init_code));
         std::exit(EXIT_FAILURE);
     }
 
-    OutputDebugStringA("Success");
+    LogInfo("Success");
 }
 
+
 SOCKET create_socket() {
-    OutputDebugStringA("Creating socket...");
+    LogInfo("Creating default TCP socket with IPv4 address family...");
 
     SOCKET _socket = socket(AF_INET, SOCK_STREAM, 0);
 
     if (_socket == INVALID_SOCKET) {
-        OutputDebugStringA("Failed");
+        LogCritical("Failed, socket declared invalid");
 
-        WSACleanup();
+        winsock_cleanup();
 
         std::exit(EXIT_FAILURE);
     }
 
-    OutputDebugStringA("Success");
+    LogInfo("Success");
 
     return _socket;
 }
@@ -34,40 +37,61 @@ SOCKET create_socket() {
 sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
     sockaddr_in server;
 
-    OutputDebugStringA((std::string("Connecting to server at ") + ip + ":" + std::to_string(port) + "...").c_str());
+    LogInfo(std::string("Connecting to server at ") + ip + ":" + std::to_string(port) + "...");
 
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
     inet_pton(AF_INET, ip, &server.sin_addr);
 
     if (connect(_socket, (sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
-        OutputDebugStringA("Failed");
+        LogCritical("Failed to connect");
 
-        closesocket(_socket);
-        WSACleanup();
+        server_cleanup(_socket);
 
         std::exit(EXIT_FAILURE);
     }
 
-    OutputDebugStringA("Success");
+    LogInfo("Success");
 
     return server;
 }
 
 void send_json_data(SOCKET _socket, JSON data) {
     std::string request = json_data_to_post_request(data);
-    send(_socket, request.c_str(), request.size(), 0);
+
+    LogInfo(std::string("Sending data: ") + serialize_json(data));
+
+    if (send(_socket, request.c_str(), request.size(), 0) == SOCKET_ERROR) {
+        LogError(std::string("Failed to send with error code ") + std::to_string(WSAGetLastError()));
+    }
+    else {
+        LogInfo("Success");
+    }
 }
 
-std::string json_data_to_post_request(JSON data) {
-    std::string data_string = serialize_json(data);
+void server_cleanup(SOCKET _socket) {
+    close_socket(_socket);
+    winsock_cleanup();
+}
 
-    std::string request = "POST / HTTP/1.1\r\n";
-    request += "Host: localhost:8080\r\n";
-    request += "Content-Type: application/json\r\n";
-    request += "Content-Length: " + std::to_string(data_string.length()) + "\r\n";
-    request += "Connection: keep-alive\r\n\r\n";
-    request += data_string;
+void winsock_cleanup() {
+    LogInfo("Cleaning up Winsock...");
 
-    return request;
+    if (WSACleanup() == SOCKET_ERROR) {
+        LogError(std::string("Cleanup failed with error code ") + std::to_string(WSAGetLastError()));
+    }
+    else {
+        LogInfo("Success");
+    }
+}
+
+void close_socket(SOCKET _socket) {
+    LogInfo("Closing socket...");
+
+    if (closesocket(_socket) == SOCKET_ERROR) {
+        LogCritical(std::string("Close failed with error code ") + std::to_string(WSAGetLastError()));
+    }
+    else {
+        LogInfo("Success");
+    }
 }
