@@ -1,6 +1,6 @@
 #include "include/system_info.hpp"
 
-std::string get_cpu_info() {
+std::string get_cpu_name() {
     std::string info;
 
     std::array<int, 4> integer_buffer = {};
@@ -8,19 +8,8 @@ std::string get_cpu_info() {
 
     constexpr size_t int_buf_size = sizeof(int) * integer_buffer.size();
 
-    constexpr std::array<unsigned int, 3> function_ids = {
-        // Manufacturer
-        0x80000002,
-
-        // Model
-        0x80000003,
-
-        // Clock Speed
-        0x80000004
-    };
-
-    for (int id: function_ids) {
-        __cpuid(integer_buffer.data(), id);
+    for (int i = 2; i <= 4; i++) {
+        __cpuid(integer_buffer.data(), 0x80000000 + i);
 
         std::memcpy(char_buffer.data(), integer_buffer.data(), int_buf_size);
 

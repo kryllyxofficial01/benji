@@ -2,14 +2,11 @@
 
 void WINAPI service_main(int argc, char** argv) {
     service.status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-    service.status.dwCurrentState = SERVICE_START_PENDING;
     service.status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
-
-    service.status.dwWin32ExitCode = 0;
     service.status.dwServiceSpecificExitCode = 0;
-
     service.status.dwCheckPoint = 0;
-    service.status.dwWaitHint = 0;
+
+    report_service_status(SERVICE_START_PENDING, NO_ERROR, 0);
 
     service.status_handle = RegisterServiceCtrlHandler(
         TEXT("BenjiService"),
@@ -30,6 +27,8 @@ void WINAPI service_main(int argc, char** argv) {
 
     report_service_status(SERVICE_RUNNING, NO_ERROR, 0);
 
+    OutputDebugStringA(get_cpu_name().c_str());
+
     boolean running = true;
     while (running) {
         Sleep(1000); // TODO: make this a configurable value, will be the update period for the main dashboard
@@ -40,17 +39,20 @@ void WINAPI control_handler(DWORD request) {
     switch (request) {
         case SERVICE_CONTROL_STOP:
         case SERVICE_CONTROL_SHUTDOWN: {
-            OutputDebugStringA("Stopping service...");
+            OutputDebugStringA("Stopping BenjiService...");
 
             report_service_status(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
             // cleanup
+            OutputDebugStringA("Closing socket...");
             closesocket(server_config._socket);
+
+            OutputDebugStringA("Cleaning up Winsock...");
             WSACleanup();
 
             report_service_status(SERVICE_STOPPED, NO_ERROR, 0);
 
-            OutputDebugStringA("Stopped");
+            OutputDebugStringA("BenjiService stopped");
 
             break;
         }

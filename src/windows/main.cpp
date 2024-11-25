@@ -7,8 +7,6 @@
 int main(int argc, char** argv) {
     winsock_init();
 
-    std::cout << get_cpu_info() << std::endl;
-
     SERVICE_TABLE_ENTRY service_dispatch_table[] = {
         {
             TEXT("BenjiService"),

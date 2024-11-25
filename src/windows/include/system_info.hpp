@@ -6,6 +6,6 @@
 #include <intrin.h>
 #include <cstring>
 
-std::string get_cpu_info();
+std::string get_cpu_name();
 
 #endif
