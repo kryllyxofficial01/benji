@@ -8,7 +8,6 @@
 #include "server.hpp"
 #include "system_info.hpp"
 #include "logger.hpp"
-#include "config.hpp"
 #include "utils.hpp"
 
 inline struct BENJI_SERVICE_STATUS {

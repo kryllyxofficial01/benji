@@ -1,3 +1,0 @@
-[submodule "src/windows/include/tomlplusplus"]
-	path = src/windows/include/tomlplusplus
-	url = https://github.com/marzer/tomlplusplus.git

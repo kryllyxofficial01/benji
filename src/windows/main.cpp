@@ -2,7 +2,6 @@
 
 #include "include/service_manager.hpp"
 #include "include/system_info.hpp"
-#include "include/config.hpp"
 #include "include/utils.hpp"
 
 int main(int argc, char** argv) {
@@ -17,7 +16,7 @@ int main(int argc, char** argv) {
     };
 
     if (!StartServiceCtrlDispatcher(service_dispatch_table)) {
-        std::cerr << "StartServiceCtrlDispatcher failed: " << WSAGetLastError() << std::endl;
+        LogCritical(std::string("StartServiceCtrlDispatcher failed with error code ") + std::to_string(WSAGetLastError()));
         return EXIT_FAILURE;
     }
 
