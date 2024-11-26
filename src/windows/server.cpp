@@ -34,6 +34,17 @@ SOCKET create_socket() {
     return _socket;
 }
 
+void close_socket(SOCKET _socket) {
+    LogInfo("Closing socket...");
+
+    if (closesocket(_socket) == SOCKET_ERROR) {
+        LogCritical(std::string("Close failed with error code ") + std::to_string(WSAGetLastError()));
+    }
+    else {
+        LogInfo("Success");
+    }
+}
+
 sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
     sockaddr_in server;
 
@@ -79,17 +90,6 @@ void winsock_cleanup() {
 
     if (WSACleanup() == SOCKET_ERROR) {
         LogError(std::string("Cleanup failed with error code ") + std::to_string(WSAGetLastError()));
-    }
-    else {
-        LogInfo("Success");
-    }
-}
-
-void close_socket(SOCKET _socket) {
-    LogInfo("Closing socket...");
-
-    if (closesocket(_socket) == SOCKET_ERROR) {
-        LogCritical(std::string("Close failed with error code ") + std::to_string(WSAGetLastError()));
     }
     else {
         LogInfo("Success");

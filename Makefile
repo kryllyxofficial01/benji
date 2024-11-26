@@ -2,7 +2,7 @@ GXX = g++
 
 GXX_FLAGS = -g -std=c++17 -Wno-return-type
 LINKED_LIBS = -lWs2_32
-INCLUDE = -Isrc\windows\include\tomlplusplus\include
+INCLUDE = 
 
 BUILD = build
 
