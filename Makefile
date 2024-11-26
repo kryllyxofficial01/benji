@@ -2,6 +2,7 @@ GXX = g++
 
 GXX_FLAGS = -g -std=c++17 -Wno-return-type
 LINKED_LIBS = -lWs2_32
+INCLUDE = -Isrc\windows\include\tomlplusplus\include
 
 BUILD = build
 
@@ -11,7 +12,7 @@ LINUX_SRC = $(wildcard src/linux/*.cpp)
 all: windows linux
 
 windows:
-	$(GXX) $(GXX_FLAGS) $(WINDOWS_SRC) -o $(BUILD)/benji-service $(LINKED_LIBS)
+	$(GXX) $(GXX_FLAGS) $(INCLUDE) $(WINDOWS_SRC) -o $(BUILD)/benji-service $(LINKED_LIBS)
 
 linux:
 	mkdir -p $(BUILD)

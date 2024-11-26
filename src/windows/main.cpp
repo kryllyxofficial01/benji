@@ -1,8 +1,9 @@
 #include <iostream>
 
 #include "include/service_manager.hpp"
-#include "include/utils.hpp"
 #include "include/system_info.hpp"
+#include "include/config.hpp"
+#include "include/utils.hpp"
 
 int main(int argc, char** argv) {
     winsock_init();
