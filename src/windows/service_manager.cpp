@@ -18,8 +18,11 @@ void WINAPI service_main(int argc, char** argv) {
         return;
     }
 
-    server_config.ip = "127.0.0.1";
-    server_config.port = 8080;
+    toml::table server_config_data = parse_config_file(""); // TODO: find alternative to pasting in the full path to TOML file
+
+    // this sucks, i need to find a better way of getting correct value types
+    server_config.ip = server_config_data["connection"]["ip"].value_exact<std::string>().value().c_str();
+    server_config.port = server_config_data["connection"]["port"].value_exact<int64_t>().value();
 
     server_config._socket = create_socket();
 
