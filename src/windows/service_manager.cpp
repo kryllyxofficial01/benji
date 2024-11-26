@@ -18,11 +18,6 @@ void WINAPI service_main(int argc, char** argv) {
         return;
     }
 
-    JSON data = {
-        {"test", "19"},
-        {"tset", "17"}
-    };
-
     server_config.ip = "127.0.0.1";
     server_config.port = 8080;
 
@@ -42,7 +37,7 @@ void WINAPI control_handler(DWORD request) {
     switch (request) {
         case SERVICE_CONTROL_STOP:
         case SERVICE_CONTROL_SHUTDOWN: {
-            LogInfo("Stopping BenjiService...");
+            LogInfo("Stopping service...");
 
             report_service_status(SERVICE_STOP_PENDING, 0, 0);
 
@@ -51,7 +46,7 @@ void WINAPI control_handler(DWORD request) {
 
             report_service_status(SERVICE_STOPPED, 0, 0);
 
-            LogInfo("BenjiService stopped");
+            LogInfo("Service stopped");
 
             break;
         }

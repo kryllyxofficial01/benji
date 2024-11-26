@@ -4,9 +4,9 @@
 #include <string>
 #include <map>
 
-#define JSON std::map<std::string, std::string>
+typedef std::map<std::string, std::string> json_t;
 
-std::string serialize_json(JSON data);
-std::string json_data_to_post_request(JSON data);
+std::string serialize_json(json_t data);
+std::string json_data_to_post_request(json_t data);
 
 #endif

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-std::string serialize_json(JSON data) {
+std::string serialize_json(json_t data) {
     std::string serialized = "{";
 
     for (auto element: data) {
@@ -17,7 +17,7 @@ std::string serialize_json(JSON data) {
     return serialized;
 }
 
-std::string json_data_to_post_request(JSON data) {
+std::string json_data_to_post_request(json_t data) {
     std::string data_string = serialize_json(data);
 
     std::string request = "POST / HTTP/1.1\r\n";

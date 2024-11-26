@@ -56,7 +56,7 @@ sockaddr_in server_connect(const char* ip, int port, SOCKET _socket) {
     return server;
 }
 
-void send_json_data(SOCKET _socket, JSON data) {
+void send_json_data(SOCKET _socket, json_t data) {
     std::string request = json_data_to_post_request(data);
 
     LogInfo(std::string("Sending data: ") + serialize_json(data));
