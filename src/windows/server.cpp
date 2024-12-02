@@ -155,7 +155,7 @@ std::string parse_http_request(const std::string& request, std::string& method, 
             body = request.substr(position + 4);
         }
         else {
-            LogError("Received malformed POST request, unable to body content");
+            LogError("Received malformed POST request, unable to locate body content");
         }
     }
 
