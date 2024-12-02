@@ -15,6 +15,24 @@ void winsock_init() {
     LogInfo("Success");
 }
 
+SOCKET create_socket() {
+    LogInfo("Creating default TCP server socket with IPv4 address family...");
+
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (sock == INVALID_SOCKET) {
+        LogCritical("Failed, socket declared invalid");
+
+        winsock_cleanup();
+
+        std::exit(EXIT_FAILURE);
+    }
+
+    LogInfo("Success");
+
+    return sock;
+}
+
 sockaddr_in create_server(const char* ip, int port, SOCKET sock) {
     LogInfo(std::string("Creating server at ") + ip + ":" + std::to_string(port) + "...");
 
@@ -53,10 +71,49 @@ sockaddr_in create_server(const char* ip, int port, SOCKET sock) {
     return server;
 }
 
+void run_server(SOCKET server_socket) {
+    server_state = SERVER_STATE::RUNNING;
+
+    while (server_state == SERVER_STATE::RUNNING) {
+        sockaddr_in client;
+
+        int client_size = sizeof(client);
+        SOCKET client_socket = accept(server_socket, (sockaddr*) &client, &client_size);
+
+        u_long imode = 1;
+        if (ioctlsocket(client_socket, FIONBIO, &imode) != 0) {
+            LogCritical("Failed to set client socket to non-blocking mode with error code " + std::to_string(WSAGetLastError()));
+
+            server_state = SERVER_STATE::STOPPED;
+
+            continue;
+        }
+
+        if (client_socket == INVALID_SOCKET) {
+            LogError("Failed to accept new client with error code " + std::to_string(WSAGetLastError()));
+            continue;
+        }
+
+        LogInfo("New client connected");
+
+        handle_client(client_socket);
+    }
+
+    server_state = SERVER_STATE::STOPPED;
+}
+
 void handle_client(SOCKET client_socket) {
     bool keep_alive = true;
 
     while (keep_alive) {
+        if (server_state == SERVER_STATE::STOPPING) {
+            keep_alive = false;
+
+            close_socket(client_socket);
+
+            continue;
+        }
+
         std::string request = receive_data(client_socket);
         std::string method, body;
 
@@ -92,14 +149,19 @@ void handle_client(SOCKET client_socket) {
             LogError("405 Method Not Allowed: " + method);
         }
 
-        send(client_socket, response.c_str(), response.size(), 0);
+        LogInfo("Sending response to client...");
+
+        if (send(client_socket, response.c_str(), response.size(), 0) == SOCKET_ERROR) {
+            LogError("Failed to send with error code " + std::to_string(WSAGetLastError()));
+        }
+        else {
+            LogInfo("Success");
+        }
 
         if (!keep_alive) {
             LogInfo("Connection closed by client");
         }
     }
-
-    close_socket(client_socket);
 }
 
 std::string receive_data(SOCKET client_socket) {
@@ -162,23 +224,40 @@ std::string parse_http_request(const std::string& request, std::string& method, 
     return path;
 }
 
-SOCKET create_socket() {
-    LogInfo("Creating default TCP socket with IPv4 address family...");
+// sockaddr_in server_connect(const char* ip, int port, SOCKET sock) {
+//     sockaddr_in server;
 
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+//     LogInfo(std::string("Connecting to server at ") + ip + ":" + std::to_string(port) + "...");
 
-    if (sock == INVALID_SOCKET) {
-        LogCritical("Failed, socket declared invalid");
+//     server.sin_family = AF_INET;
+//     server.sin_port = htons(port);
+//     inet_pton(AF_INET, ip, &server.sin_addr);
 
-        winsock_cleanup();
+//     if (connect(sock, (sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
+//         LogCritical("Failed to connect with error code" + std::to_string(WSAGetLastError()));
 
-        std::exit(EXIT_FAILURE);
-    }
+//         server_cleanup(sock);
 
-    LogInfo("Success");
+//         std::exit(EXIT_FAILURE);
+//     }
 
-    return sock;
-}
+//     LogInfo("Success");
+
+//     return server;
+// }
+
+// void send_json_data(SOCKET sock, json_t data) {
+//     std::string request = json_data_to_post_request(data);
+
+//     LogInfo(std::string("Sending data: ") + serialize_json(data));
+
+//     if (send(sock, request.c_str(), request.size(), 0) == SOCKET_ERROR) {
+//         LogError("Failed to send with error code " + std::to_string(WSAGetLastError()));
+//     }
+//     else {
+//         LogInfo("Success");
+//     }
+// }
 
 void close_socket(SOCKET sock) {
     LogInfo("Closing socket...");
@@ -191,43 +270,15 @@ void close_socket(SOCKET sock) {
     }
 }
 
-sockaddr_in server_connect(const char* ip, int port, SOCKET sock) {
-    sockaddr_in server;
-
-    LogInfo(std::string("Connecting to server at ") + ip + ":" + std::to_string(port) + "...");
-
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    inet_pton(AF_INET, ip, &server.sin_addr);
-
-    if (connect(sock, (sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
-        LogCritical("Failed to connect with error code" + std::to_string(WSAGetLastError()));
-
-        server_cleanup(sock);
-
-        std::exit(EXIT_FAILURE);
-    }
-
-    LogInfo("Success");
-
-    return server;
-}
-
-void send_json_data(SOCKET sock, json_t data) {
-    std::string request = json_data_to_post_request(data);
-
-    LogInfo(std::string("Sending data: ") + serialize_json(data));
-
-    if (send(sock, request.c_str(), request.size(), 0) == SOCKET_ERROR) {
-        LogError("Failed to send with error code " + std::to_string(WSAGetLastError()));
-    }
-    else {
-        LogInfo("Success");
-    }
-}
-
 void server_cleanup(SOCKET sock) {
     close_socket(sock);
+
+    // server_state = SERVER_STATE::STOPPING;
+
+    // LogInfo("Waiting for server to close...");
+
+    // while (server_state != SERVER_STATE::STOPPED) {}
+
     winsock_cleanup();
 }
 
