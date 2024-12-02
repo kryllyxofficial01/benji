@@ -18,7 +18,7 @@ inline struct BENJI_SERVICE_STATUS {
 inline struct BENJI_SERVER_CONFIG {
     const char* ip;
     int port;
-    SOCKET _socket;
+    SOCKET sock;
 } server_config;
 
 void WINAPI service_main(int argc, char** argv);

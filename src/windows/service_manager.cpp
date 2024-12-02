@@ -17,13 +17,14 @@ void WINAPI service_main(int argc, char** argv) {
         LogCritical(std::string("RegisterServiceCtrlHandler failed with error code ") + std::to_string(WSAGetLastError()));
         std::exit(EXIT_FAILURE);
     }
-    
+
     server_config.ip = "127.0.0.1";
     server_config.port = 8080;
 
-    server_config._socket = create_socket();
+    server_config.sock = create_socket();
 
-    server_connect(server_config.ip, server_config.port, server_config._socket);
+    // server_connect(server_config.ip, server_config.port, server_config.sock);
+    create_server(server_config.ip, server_config.port, server_config.sock);
 
     report_service_status(SERVICE_RUNNING, 0, 0);
 
@@ -42,7 +43,7 @@ void WINAPI control_handler(DWORD request) {
             report_service_status(SERVICE_STOP_PENDING, 0, 0);
 
             // cleanup
-            server_cleanup(server_config._socket);
+            server_cleanup(server_config.sock);
 
             report_service_status(SERVICE_STOPPED, 0, 0);
 
