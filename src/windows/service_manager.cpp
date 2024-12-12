@@ -28,6 +28,8 @@ void WINAPI service_main(int argc, char** argv) {
 
     report_service_status(SERVICE_RUNNING, 0, 0);
 
+    server_config.server_thread = new std::thread(run_server, server_config.sock);
+
     boolean running = true;
     while (running) {
         Sleep(1000); // TODO: make this a configurable value, will be the update period for the main dashboard
@@ -41,6 +43,9 @@ void WINAPI control_handler(DWORD request) {
             LogInfo("Stopping service...");
 
             report_service_status(SERVICE_STOP_PENDING, 0, 0);
+
+            server_state = SERVER_STATE::STOPPING;
+            server_config.server_thread->join(); // wait for the server to close
 
             // cleanup
             server_cleanup(server_config.sock);

@@ -56,9 +56,9 @@ sockaddr_in create_server(const char* ip, int port, SOCKET sock) {
     }
     LogInfo("Success");
 
-    LogInfo("Attempting to listen to address...");
+    LogInfo("Attempting to put socket in listening mode...");
     if (listen(sock, SOMAXCONN) == SOCKET_ERROR) {
-        LogCritical(std::string("Failed to listen on ") + ip + ":" + std::to_string(port) + " with error code " + std::to_string(WSAGetLastError()));
+        LogCritical("Failed to put socket in listening mode" + std::to_string(WSAGetLastError()));
 
         winsock_cleanup();
 
@@ -74,7 +74,14 @@ sockaddr_in create_server(const char* ip, int port, SOCKET sock) {
 void run_server(SOCKET server_socket) {
     server_state = SERVER_STATE::RUNNING;
 
-    while (server_state == SERVER_STATE::RUNNING) {
+    while (true) {
+        LogInfo(std::to_string(server_state));
+
+        if (server_state == SERVER_STATE::STOPPING) {
+            server_state = SERVER_STATE::STOPPED;
+            break;
+        }
+
         sockaddr_in client;
 
         int client_size = sizeof(client);
@@ -82,24 +89,46 @@ void run_server(SOCKET server_socket) {
 
         u_long imode = 1;
         if (ioctlsocket(client_socket, FIONBIO, &imode) != 0) {
-            LogCritical("Failed to set client socket to non-blocking mode with error code " + std::to_string(WSAGetLastError()));
+            LogError("Failed to set client socket to non-blocking mode with error code " + std::to_string(WSAGetLastError()));
 
-            server_state = SERVER_STATE::STOPPED;
+            close_socket(client_socket);
 
             continue;
         }
 
         if (client_socket == INVALID_SOCKET) {
             LogError("Failed to accept new client with error code " + std::to_string(WSAGetLastError()));
+
+            close_socket(client_socket);
+
+            continue;
+        }
+
+        int error = 0;
+        socklen_t error_code_size = sizeof(error);
+
+        if (getsockopt(client_socket, SOL_SOCKET, SO_ERROR, (char*) &error, &error_code_size) != 0) {
+            LogError("Unable to get error code from getsockopt()");
+
+            close_socket(client_socket);
+
+            continue;
+        }
+
+        if (error != 0) {
+            LogError("getsockopt() failed with exit code " + std::to_string(WSAGetLastError()));
+
+            close_socket(client_socket);
+
             continue;
         }
 
         LogInfo("New client connected");
 
         handle_client(client_socket);
-    }
 
-    server_state = SERVER_STATE::STOPPED;
+        close_socket(client_socket); // once the client disconnects, close the socket
+    }
 }
 
 void handle_client(SOCKET client_socket) {

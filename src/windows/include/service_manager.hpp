@@ -4,6 +4,7 @@
 #define UNICODE // i hate C sometimes
 
 #include <iostream>
+#include <thread>
 
 #include "server.hpp"
 #include "system_info.hpp"
@@ -19,6 +20,7 @@ inline struct BENJI_SERVER_CONFIG {
     const char* ip;
     int port;
     SOCKET sock;
+    std::thread* server_thread;
 } server_config;
 
 void WINAPI service_main(int argc, char** argv);
