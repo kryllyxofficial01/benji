@@ -1,23 +1,23 @@
-GXX = g++
+GXX = gcc
 
-GXX_FLAGS = -g -std=c++17
+GXX_FLAGS = -g
 LINKED_LIBS = -lWs2_32
-INCLUDE =
 
 BUILD = build
 OBJ = $(BUILD)/obj
+EXEC = benji
 
-WINDOWS_SRC = $(wildcard src/windows/*.cpp)
-WINDOWS_OBJS = $(subst src/windows/, $(OBJ)/, $(addsuffix .o, $(basename $(WINDOWS_SRC))))
+SRC = $(wildcard src/*.c)
+OBJS = $(subst src/, $(OBJ)/, $(addsuffix .o, $(basename $(SRC))))
 
-all: clean windows
+all: clean compile
 
-windows: $(BUILD)/benji-service
+compile: $(BUILD)/$(EXEC)
 
-$(BUILD)/benji-service: $(WINDOWS_OBJS)
-	$(GXX) $(WINDOWS_OBJS) -o $@ $(LINKED_LIBS)
+$(BUILD)/$(EXEC): $(OBJS)
+	$(GXX) $(OBJS) -o $@ $(LINKED_LIBS)
 
-$(OBJ)/%.o: src/windows/%.cpp
+$(OBJ)/%.o: src/%.c
 	$(GXX) $(GXX_FLAGS) -c $< -o $@
 
 .PHONY: clean
