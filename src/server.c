@@ -1,6 +1,6 @@
 #include "include/server.h"
 
-SOCKET create_server() {
+BENJI_ABI SOCKET create_server() {
     struct sockaddr_in server_address;
 
     server_address.sin_family = AF_INET; // ipv4 address family

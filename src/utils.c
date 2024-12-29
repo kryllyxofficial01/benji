@@ -1,73 +1,79 @@
 #include "include/utils.h"
 
-#if defined(_WIN32)
-    void winsock_init() {
-        struct WSAData wsa_data;
+#ifndef BENJI_NO_SERVER_INCLUDES
+    #if defined(_WIN32)
+        BENJI_ABI void winsock_init() {
+            struct WSAData wsa_data;
 
-        printf("Initializing Winsock2 ... ");
+            printf("Initializing Winsock2 ... ");
 
-        if (WSAStartup(WINSOCK_VERSION, &wsa_data) != NO_ERROR) {
-            printf("Failed to initialize Winsock2");
+            if (WSAStartup(WINSOCK_VERSION, &wsa_data) != NO_ERROR) {
+                printf("Failed to initialize Winsock2");
+
+                exit(EXIT_FAILURE);
+            }
+
+            printf("Success\n\n");
+        }
+
+        BENJI_ABI void winsock_cleanup() {
+            if (WSACleanup() == SOCKET_ERROR) {
+                printf("Failed to cleanup Winsock2\n");
+
+                exit(EXIT_FAILURE);
+            }
+        }
+    #endif
+
+    BENJI_ABI SOCKET create_socket() {
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+        if (sock == SOCKET_ERROR) {
+            printf("Failed to close socket\n");
+
+            #if defined(_WIN32)
+                winsock_cleanup();
+            #endif
 
             exit(EXIT_FAILURE);
         }
 
-        printf("Success\n\n");
+        return sock;
     }
 
-    void winsock_cleanup() {
-        if (WSACleanup() == SOCKET_ERROR) {
-            printf("Failed to cleanup Winsock2\n");
+    BENJI_ABI void close_socket(SOCKET sock) {
+        int return_code;
+
+        #if defined(_WIN32)
+            return_code = closesocket(sock);
+        #elif defined(__linux__)
+            return_code = close(sock);
+        #endif
+
+        if (return_code == SOCKET_ERROR) {
+            printf("Failed to close socket\n");
+
+            #if defined(_WIN32)
+                winsock_cleanup();
+            #endif
 
             exit(EXIT_FAILURE);
         }
+    }
+
+    void stop(const unsigned int exit_code) {
+        #if defined(_WIN32)
+            winsock_cleanup();
+        #endif
+
+        exit(EXIT_FAILURE);
     }
 #endif
 
-SOCKET create_socket() {
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+void remove_whitespace(char* string) {
+    char* i = string;
 
-    #if defined(_WIN32)
-        if (sock == INVALID_SOCKET) {
-            printf("Failed to create socket\n");
-
-            winsock_cleanup();
-
-            exit(EXIT_FAILURE);
-        }
-    #elif defined(__linux__)
-        if (sock == SOCKET_ERROR) {
-            printf("Failed to create socket: %s\n", strerror(errno));
-
-            exit(EXIT_FAILURE);
-        }
-    #endif
-
-    return sock;
-}
-
-void close_socket(SOCKET sock) {
-    #if defined(_WIN32)
-        if (closesocket(sock) == SOCKET_ERROR) {
-            printf("Failed to close socket\n");
-
-            winsock_cleanup();
-
-            exit(EXIT_FAILURE);
-        }
-    #elif defined(__linux__)
-        if (close(sock) != NO_ERROR) {
-            printf("Failed to close socket\n");
-
-            exit(EXIT_FAILURE);
-        }
-    #endif
-}
-
-void stop(const unsigned int exit_code) {
-    #if defined(_WIN32)
-        winsock_cleanup();
-    #endif
-
-    exit(EXIT_FAILURE);
+    do {
+        while (isspace(*i)) { ++i; }
+    } while (*string++ = *i++);
 }
