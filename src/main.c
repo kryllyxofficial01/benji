@@ -2,9 +2,11 @@
 #include "include/utils.h"
 
 int main(int argc, const char* argv[]) {
-    winsock_init();
+    #if defined(_WIN32)
+        winsock_init();
+    #endif
 
     SOCKET server_socket = create_server();
 
-    closesocket(server_socket);
+    close_socket(server_socket);
 }

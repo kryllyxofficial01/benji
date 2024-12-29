@@ -4,7 +4,12 @@ SOCKET create_server() {
     struct sockaddr_in server_address;
 
     server_address.sin_family = AF_INET; // ipv4 address family
-    server_address.sin_addr.S_un.S_addr = INADDR_ANY;
+
+    #if defined(_WIN32)
+        server_address.sin_addr.S_un.S_addr = INADDR_ANY;
+    #elif defined(__linux__)
+        server_address.sin_addr.s_addr = INADDR_ANY;
+    #endif
 
     printf("Creating server socket ... ");
 
@@ -13,17 +18,13 @@ SOCKET create_server() {
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == SOCKET_ERROR) {
         printf("Failed to bind to server address\n");
 
-        winsock_cleanup();
-
-        exit(EXIT_FAILURE);
+        stop(EXIT_FAILURE);
     }
 
     if (listen(server_socket, MAX_SOCK_CONNS) == SOCKET_ERROR) {
         printf("Failed to put into listening mode\n");
 
-        winsock_cleanup();
-
-        exit(EXIT_FAILURE);
+        stop(EXIT_FAILURE);
     }
 
     printf("Success\n\n");
