@@ -3,13 +3,15 @@
 void winsock_init() {
     struct WSAData wsa_data;
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != NO_ERROR) {
+    printf("Initializing Winsock2 ... ");
+
+    if (WSAStartup(WINSOCK_VERSION, &wsa_data) != NO_ERROR) {
         printf("Failed to initialize Winsock2");
 
         exit(EXIT_FAILURE);
     }
 
-    printf("Winsock2 initialized\n\n");
+    printf("Success\n\n");
 }
 
 void winsock_cleanup() {
@@ -18,4 +20,18 @@ void winsock_cleanup() {
 
         exit(EXIT_FAILURE);
     }
+}
+
+SOCKET create_socket() {
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (sock == INVALID_SOCKET) {
+        printf("Failed to create socket\n");
+
+        winsock_cleanup();
+
+        exit(EXIT_FAILURE);
+    }
+
+    return sock;
 }

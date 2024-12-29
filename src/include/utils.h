@@ -1,4 +1,4 @@
-#ifndef __BENJI_UTILS_HPP
+#ifndef __BENJI_UTILS_H
 
 #include <stdio.h>
 
@@ -11,7 +11,11 @@
     #include <ws2tcpip.h>
 #endif
 
+#define MAX_SOCK_CONNS 5 // maximum number of tries to connect to a socket
+
 void winsock_init();
 void winsock_cleanup();
+
+SOCKET create_socket();
 
 #endif
