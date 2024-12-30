@@ -84,7 +84,7 @@
                 wmi_entry_to_string(entry)
             );
 
-            return run_powershell_command(command);
+            return run_command(command);
         }
 
         const char* wmi_type_to_string(enum BENJI_WMI_TYPE type) {
@@ -107,7 +107,7 @@
             }
         }
 
-        const char* run_powershell_command(const char* command) {
+        const char* run_command(const char* command) {
             FILE* command_pipe = _popen(command, "r");
             if (command_pipe == NULL) {
                 _pclose(command_pipe);

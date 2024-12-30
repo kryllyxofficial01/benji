@@ -1,7 +1,7 @@
 #ifndef __BENJI_CPU_INFO_H
 #define __BENJI_CPU_INFO_H
 
-#define BENJI_NO_SERVER_INCLUDES // we dont need all the server stuff in utils.h
+#define BENJI_NO_SERVER_INCLUDES
 
 #include "utils.h"
 

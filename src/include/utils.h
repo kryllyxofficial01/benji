@@ -7,12 +7,12 @@
 #include <ctype.h>
 
 #ifdef _WIN32
-    #define WIN32_LEAN_AND_MEAN /* compact WIN32 to only common utilities */
+    #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */
 #endif
 
 #ifndef BENJI_NO_SERVER_INCLUDES
     #if defined(_WIN32)
-        #define BENJI_ABI WINAPI
+        #define BENJI_ABI __cdecl
 
         #pragma comment(lib, "ws2_32.lib")
 
@@ -59,14 +59,15 @@
             WMI_GPU_NAMES,
             WMI_GPU_CURRENT_HORIZONTAL_RESOLUTIONS,
             WMI_GPU_CURRENT_VERTICAL_RESOLUTIONS,
-            WMI_GPU_CURRENT_REFRESH_RATES
+            WMI_GPU_CURRENT_REFRESH_RATES,
+            WMI_GPU_ADAPTER_RAM_AMOUNTS
         };
 
         const char* wmi_get_data(enum BENJI_WMI_TYPE type, enum BENJI_WMI_ENTRY entry);
         const char* wmi_type_to_string(enum BENJI_WMI_TYPE type);
         const char* wmi_entry_to_string(enum BENJI_WMI_ENTRY entry);
 
-        const char* run_powershell_command(const char* command); // returns command output
+        const char* run_command(const char* command); // returns command output
     #endif
 #endif
 
