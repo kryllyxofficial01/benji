@@ -1,6 +1,6 @@
 #include "include/server.h"
 
-BENJI_ABI SOCKET create_server() {
+BENJI_ABI BENJI_SOCKET create_server() {
     struct sockaddr_in server_address;
 
     server_address.sin_family = AF_INET; // ipv4 address family
@@ -13,15 +13,15 @@ BENJI_ABI SOCKET create_server() {
 
     printf("Creating server socket ... ");
 
-    SOCKET server_socket = create_socket();
+    BENJI_SOCKET server_socket = create_socket();
 
-    if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == SOCKET_ERROR) {
+    if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == BENJI_SOCKET_ERROR) {
         printf("Failed to bind to server address\n");
 
         stop(EXIT_FAILURE);
     }
 
-    if (listen(server_socket, MAX_SOCK_CONNS) == SOCKET_ERROR) {
+    if (listen(server_socket, BENJI_MAX_SOCK_CONNS) == BENJI_SOCKET_ERROR) {
         printf("Failed to put into listening mode\n");
 
         stop(EXIT_FAILURE);

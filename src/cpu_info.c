@@ -1,37 +1,4 @@
-#include "include/system_info.h"
-
-#if defined(_WIN32)
-    const char* wmi_get_data(enum WMI_ENTRY entry) {
-        char command[256] = "powershell.exe @(Get-WmiObject Win32_Processor).";
-        char* output = malloc(sizeof(char) * 1024);
-
-        strcat(command, wmi_entry_to_string(entry));
-
-        FILE* command_pipe = _popen(command, "r");
-        if (command_pipe == NULL) {
-            _pclose(command_pipe);
-
-            return NULL;
-        }
-        else {
-            fgets(output, sizeof(output) - 1, command_pipe);
-
-            remove_whitespace(output);
-
-            _pclose(command_pipe);
-
-            return output;
-        }
-    }
-
-    const char* wmi_entry_to_string(enum WMI_ENTRY entry) {
-        switch (entry) {
-            case WMI_CLOCK_SPEED: return "CurrentClockSpeed";
-            case WMI_CORE_COUNT: return "NumberOfCores";
-            case WMI_LOGICAL_PROCESSORS_COUNT: return "NumberOfLogicalProcessors";
-        }
-    }
-#endif
+#include "include/cpu_info.h"
 
 cpu_info_t get_cpu_info() {
     cpu_info_t info;
@@ -82,18 +49,18 @@ const char* get_cpu_arch() {
 
 double get_cpu_clock_speed() {
     #if defined(_WIN32)
-        return atof(wmi_get_data(WMI_CLOCK_SPEED)) / 1000; // the command outputs MHz, we want GHz
+        return atof(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_CLOCK_SPEED)) / 1000; // the command outputs MHz, we want GHz
     #endif
 }
 
-unsigned int get_cpu_core_count() {
+size_t get_cpu_core_count() {
     #if defined(_WIN32)
-        return atoi(wmi_get_data(WMI_CORE_COUNT));
+        return atoi(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_CORE_COUNT));
     #endif
 }
 
-unsigned int get_cpu_logical_processors_count() {
+size_t get_cpu_logical_processors_count() {
     #if defined(_WIN32)
-        return atoi(wmi_get_data(WMI_LOGICAL_PROCESSORS_COUNT));
+        return atoi(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_LOGICAL_PROCESSORS_COUNT));
     #endif
 }
