@@ -16,40 +16,40 @@
     #define BENJI_NO_ERROR 0
 #endif
 
-// #ifdef BENJI_USE_SERVER_UTILS
-//     #if defined(_WIN32)
-//         #define BENJI_SC_ABI __cdecl /* Benji Server Call */
+#ifdef BENJI_USE_SERVER_UTILS
+    #if defined(_WIN32)
+        #define BENJI_SC_ABI __cdecl /* Benji Server Call */
 
-//         #pragma comment(lib, "ws2_32.lib")
+        #pragma comment(lib, "ws2_32.lib")
 
-//         #include <winsock2.h>
-//         #include <ws2tcpip.h>
+        #include <winsock2.h>
+        #include <ws2tcpip.h>
 
-//         typedef SOCKET BENJI_SOCKET;
+        typedef SOCKET BENJI_SOCKET;
 
-//         #define BENJI_SOCKET_ERROR SOCKET_ERROR
+        #define BENJI_SOCKET_ERROR SOCKET_ERROR
 
-//         BENJI_SC_ABI void winsock_init();
-//         BENJI_SC_ABI void winsock_cleanup();
-//     #elif defined(__linux__)
-//         #define BENJI_SC_ABI
+        BENJI_SC_ABI void winsock_init();
+        BENJI_SC_ABI void winsock_cleanup();
+    #elif defined(__linux__)
+        #define BENJI_SC_ABI
 
-//         #include <sys/socket.h>
-//         #include <arpa/inet.h>
-//         #include <unistd.h>
+        #include <sys/socket.h>
+        #include <arpa/inet.h>
+        #include <unistd.h>
 
-//         typedef unsigned long long BENJI_SOCKET;
+        typedef unsigned long long BENJI_SOCKET;
 
-//         #define BENJI_SOCKET_ERROR -1
-//     #endif
+        #define BENJI_SOCKET_ERROR -1
+    #endif
 
-//     #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
+    #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
 
-//     BENJI_SC_ABI BENJI_SOCKET create_socket();
-//     BENJI_SC_ABI void close_socket(BENJI_SOCKET sock);
+    BENJI_SC_ABI BENJI_SOCKET create_socket();
+    BENJI_SC_ABI void close_socket(BENJI_SOCKET sock);
 
-//     BENJI_SC_ABI void terminate(const size_t exit_code);
-// #endif
+    BENJI_SC_ABI void terminate(const size_t exit_code);
+#endif
 
 #ifdef BENJI_USE_SYS_INFO_UTILS
     #if defined(_WIN32)
