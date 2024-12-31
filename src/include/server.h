@@ -1,10 +1,10 @@
 #ifndef __BENJI_SERVER_H
 #define __BENJI_SERVER_H
 
-#define BENJI_NO_SYS_INFO_INCLUDES
+#define BENJI_USE_SERVER_UTILS
 
 #include "utils.h"
 
-BENJI_ABI BENJI_SOCKET create_server();
+BENJI_SC_ABI BENJI_SOCKET create_server();
 
 #endif

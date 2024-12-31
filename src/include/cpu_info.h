@@ -1,7 +1,7 @@
 #ifndef __BENJI_CPU_INFO_H
 #define __BENJI_CPU_INFO_H
 
-#define BENJI_NO_SERVER_INCLUDES
+#define BENJI_USE_SYS_INFO_UTILS
 
 #include "utils.h"
 
