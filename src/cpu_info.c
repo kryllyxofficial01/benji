@@ -67,26 +67,26 @@ size_t get_cpu_logical_processors_count() {
     #endif
 }
 
-json_t* serialize_cpu_info(cpu_info_t cpu_info) {
-    json_t* cpu_info_json = json_init();
+map_t* serialize_cpu_info(cpu_info_t cpu_info) {
+    map_t* cpu_info_map = map_init();
 
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     buffer[0] = '\0';
 
-    json_insert(cpu_info_json, "cpu_name", cpu_info.name);
+    map_insert(cpu_info_map, "cpu_name", cpu_info.name);
 
-    json_insert(cpu_info_json, "cpu_arch", cpu_info.arch);
+    map_insert(cpu_info_map, "cpu_arch", cpu_info.arch);
 
     sprintf(buffer, "%0.3f", cpu_info.clock_speed);
-    json_insert(cpu_info_json, "cpu_clock_speed", buffer);
+    map_insert(cpu_info_map, "cpu_clock_speed", buffer);
 
     sprintf(buffer, "%li", cpu_info.core_count);
-    json_insert(cpu_info_json, "cpu_core_count", buffer);
+    map_insert(cpu_info_map, "cpu_core_count", buffer);
 
     sprintf(buffer, "%li", cpu_info.logical_processors_count);
-    json_insert(cpu_info_json, "cpu_logical_processors_count", buffer);
+    map_insert(cpu_info_map, "cpu_logical_processors_count", buffer);
 
     free(buffer);
 
-    return cpu_info_json;
+    return cpu_info_map;
 }

@@ -5,7 +5,7 @@
 
 #include "utils.h"
 
-#include "json.h"
+#include "map.h"
 
 #if defined(_WIN32)
     #include <windows.h>
@@ -30,6 +30,6 @@ double get_cpu_clock_speed();
 size_t get_cpu_core_count();
 size_t get_cpu_logical_processors_count();
 
-json_t* serialize_cpu_info(cpu_info_t cpu_info);
+map_t* serialize_cpu_info(cpu_info_t cpu_info);
 
 #endif
