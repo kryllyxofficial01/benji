@@ -46,7 +46,7 @@ BENJI_SC_ABI void run_server(BENJI_SOCKET server_socket) {
     char* data = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     sprintf(data, "{%s}", cpu_info_json_block);
 
-    // write_to_file("./test.json", data);
+    write_to_file("./tests/sysinfo.json", data);
 
     map_free(cpu_info_map_data);
 }

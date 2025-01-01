@@ -51,20 +51,81 @@ char* get_cpu_arch() {
 
 double get_cpu_clock_speed() {
     #if defined(_WIN32)
-        return atof(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_CLOCK_SPEED)) / 1000; // the command outputs MHz, we want GHz
+        HKEY hkey;
+
+        LONG result = RegOpenKeyEx(
+            HKEY_LOCAL_MACHINE,
+            "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+            0, KEY_READ, &hkey
+        );
+
+        if (result == BENJI_NO_ERROR) {
+            DWORD speed = 0;
+            DWORD data_type, data_size = sizeof(speed);
+
+            result = RegQueryValueEx(
+                hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
+            );
+
+            RegCloseKey(hkey);
+
+            return (result == BENJI_NO_ERROR && data_type == REG_DWORD) ? ((double) speed) / 1000 : -1.0;
+        }
+        else {
+            return -1.0;
+        }
     #endif
 }
 
-size_t get_cpu_core_count() {
+int get_cpu_core_count() {
     #if defined(_WIN32)
-        return atoi(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_CORE_COUNT));
+       return get_cpu_processor_info(count_cpu_cores);
     #endif
 }
 
-size_t get_cpu_logical_processors_count() {
+int get_cpu_logical_processors_count() {
     #if defined(_WIN32)
-        return atoi(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_LOGICAL_PROCESSORS_COUNT));
+        return get_cpu_processor_info(count_cpu_logical_processors);
     #endif
+}
+
+static int get_cpu_processor_info(processor_info_callback_t callback) {
+    DWORD length = 0;
+
+    GetLogicalProcessorInformation(NULL, &length);
+
+    SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
+
+    if (!buffer) {
+        return -1;
+    }
+
+    if (!GetLogicalProcessorInformation(buffer, &length)) {
+        free(buffer);
+
+        return -1;
+    }
+
+    DWORD result = 0;
+
+    size_t count = length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
+    for (size_t i = 0; i < count; i++) {
+        if (buffer[i].Relationship == RelationProcessorCore) {
+            result += callback(&buffer[i]);
+        }
+    }
+
+    free(buffer);
+
+    return result;
+}
+
+static DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
+    return 1;
+}
+
+static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
+    return __popcnt(info->ProcessorMask);
 }
 
 map_t* serialize_cpu_info(cpu_info_t cpu_info) {
