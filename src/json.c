@@ -52,6 +52,30 @@ int json_get_index_of(json_t* json, const char* key) {
     return BENJI_JSON_KEY_NOT_FOUND;
 }
 
+char* json_create_block(json_t* json, const char* header) {
+    char* block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH * json->capacity, char));
+    char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+
+    block[0] = '\0';
+    buffer[0] = '\0';
+
+    sprintf(buffer, "\"%s\": {", header);
+    strcat(block, buffer);
+
+    size_t i = 0;
+    for (i; i < json->size - 1; i++) {
+        sprintf(buffer, "\"%s\": \"%s\",", json->keys[i], json->values[i]);
+        strcat(block, buffer);
+    }
+
+    sprintf(buffer, "\"%s\": \"%s\"", json->keys[i], json->values[i]);
+    strcat(block, buffer);
+
+    strcat(block, "}");
+
+    return block;
+}
+
 void json_resize(json_t* json, size_t new_capacity) {
     json->keys = realloc(json->keys, BENJI_CAPACITY(new_capacity, char*));
     json->values = realloc(json->values, BENJI_CAPACITY(new_capacity, char*));

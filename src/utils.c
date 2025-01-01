@@ -51,3 +51,13 @@ size_t splitstr(const char* string, char*** tokens, const char* character) {
 
     return token_count;
 }
+
+void write_to_file(const char* filepath, const char* data) {
+    FILE* file = fopen(filepath, "w");
+
+    if (file != NULL) {
+        fprintf(file, "%s\n", data);
+    }
+
+    fclose(file);
+}

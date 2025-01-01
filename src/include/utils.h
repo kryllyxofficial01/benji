@@ -91,4 +91,6 @@
 void strtrim(char* string);
 size_t splitstr(const char* string, char*** tokens, const char* character); // returns token count
 
+void write_to_file(const char* filepath, const char* data);
+
 #endif

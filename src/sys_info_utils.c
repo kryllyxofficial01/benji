@@ -31,10 +31,10 @@
             case WMI_CPU_CORE_COUNT: return "NumberOfCores";
             case WMI_CPU_LOGICAL_PROCESSORS_COUNT: return "NumberOfLogicalProcessors";
 
-            case WMI_GPU_NAMES: return "Name";
-            case WMI_GPU_CURRENT_HORIZONTAL_RESOLUTIONS: return "CurrentHorizontalResolution";
-            case WMI_GPU_CURRENT_VERTICAL_RESOLUTIONS: return "CurrentVerticalResolution";
-            case WMI_GPU_CURRENT_REFRESH_RATES: return "CurrentRefreshRate";
+            // case WMI_GPU_NAME: return "Name";
+            // case WMI_GPU_CURRENT_HORIZONTAL_RESOLUTION: return "CurrentHorizontalResolution";
+            // case WMI_GPU_CURRENT_VERTICAL_RESOLUTION: return "CurrentVerticalResolution";
+            // case WMI_GPU_CURRENT_REFRESH_RATE: return "CurrentRefreshRate";
         }
     }
 

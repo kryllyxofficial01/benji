@@ -14,8 +14,8 @@
 #endif
 
 typedef struct CPUINFO {
-    const char* name;
-    const char* arch;
+    char* name;
+    char* arch;
     double clock_speed; // in GHz
     size_t core_count;
     size_t logical_processors_count;
@@ -24,8 +24,8 @@ typedef struct CPUINFO {
 
 cpu_info_t get_cpu_info();
 
-const char* get_cpu_name();
-const char* get_cpu_arch();
+char* get_cpu_name();
+char* get_cpu_arch();
 double get_cpu_clock_speed();
 size_t get_cpu_core_count();
 size_t get_cpu_logical_processors_count();

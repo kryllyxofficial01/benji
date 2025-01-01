@@ -4,7 +4,11 @@ cpu_info_t get_cpu_info() {
     cpu_info_t info;
 
     info.name = get_cpu_name();
+    strtrim(info.name);
+
     info.arch = get_cpu_arch();
+    strtrim(info.name);
+
     info.clock_speed = get_cpu_clock_speed();
     info.core_count = get_cpu_core_count();
     info.logical_processors_count = get_cpu_logical_processors_count();
@@ -12,7 +16,7 @@ cpu_info_t get_cpu_info() {
     return info;
 }
 
-const char* get_cpu_name() {
+char* get_cpu_name() {
     #if defined(_WIN32)
         int cpuid_info[BENJI_CPUID_CPU_NAME_BUFFER_LENGTH];
         char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
@@ -28,7 +32,7 @@ const char* get_cpu_name() {
     #endif
 }
 
-const char* get_cpu_arch() {
+char* get_cpu_arch() {
     #if defined(_WIN32)
         SYSTEM_INFO system_info;
 
