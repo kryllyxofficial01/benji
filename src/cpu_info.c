@@ -15,7 +15,7 @@ cpu_info_t get_cpu_info() {
 const char* get_cpu_name() {
     #if defined(_WIN32)
         int cpuid_info[4];
-        char cpu_name[0x40];
+        char* cpu_name = malloc(0x40 * sizeof(char));
 
         memset(cpu_name, 0, sizeof(cpu_name));
 
@@ -27,6 +27,8 @@ const char* get_cpu_name() {
 
         __cpuid(cpuid_info, 0x80000004);
         memcpy(cpu_name + 32, cpuid_info, sizeof(cpuid_info));
+
+        return cpu_name;
     #endif
 }
 
@@ -63,4 +65,28 @@ size_t get_cpu_logical_processors_count() {
     #if defined(_WIN32)
         return atoi(wmi_get_data(WMI_WIN32_PROCESSOR, WMI_CPU_LOGICAL_PROCESSORS_COUNT));
     #endif
+}
+
+json_t* serialize_cpu_info(cpu_info_t cpu_info) {
+    json_t* cpu_info_json = json_init();
+
+    char* buffer = malloc(1024 * sizeof(char));
+    buffer[0] = '\0';
+
+    json_insert(cpu_info_json, "cpu_name", cpu_info.name);
+
+    json_insert(cpu_info_json, "cpu_arch", cpu_info.arch);
+
+    sprintf(buffer, "%f", cpu_info.clock_speed);
+    json_insert(cpu_info_json, "cpu_clock_speed", buffer);
+
+    sprintf(buffer, "%li", cpu_info.core_count);
+    json_insert(cpu_info_json, "cpu_core_count", buffer);
+
+    sprintf(buffer, "%li", cpu_info.logical_processors_count);
+    json_insert(cpu_info_json, "cpu_logical_processors_count", buffer);
+
+    free(buffer);
+
+    return cpu_info_json;
 }

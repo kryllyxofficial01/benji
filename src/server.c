@@ -38,9 +38,13 @@ BENJI_SC_ABI BENJI_SOCKET create_server() {
 }
 
 BENJI_SC_ABI void run_server(BENJI_SOCKET server_socket) {
-    while (true) {
-        cpu_info_t cpu_info = get_cpu_info();
+    cpu_info_t cpu_info = get_cpu_info();
 
-        // json_t json_data = serialize_cpu_info(cpu_info);
+    json_t* json_data = serialize_cpu_info(cpu_info);
+
+    for (size_t i = 0; i < json_data->size; i++) {
+        printf("%s : %s\n", json_data->keys[i], json_data->values[i]);
     }
+
+    json_free(json_data);
 }

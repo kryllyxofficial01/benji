@@ -5,6 +5,8 @@
 
 #include "utils.h"
 
+#include "json.h"
+
 #if defined(_WIN32)
     #include <windows.h>
     #include <intrin.h>
@@ -27,5 +29,7 @@ const char* get_cpu_arch();
 double get_cpu_clock_speed();
 size_t get_cpu_core_count();
 size_t get_cpu_logical_processors_count();
+
+json_t* serialize_cpu_info(cpu_info_t cpu_info);
 
 #endif
