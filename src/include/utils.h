@@ -11,10 +11,6 @@
     #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */
 #endif
 
-#define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
-
-#define BENJI_CAPACITY(n, t) ((n) * sizeof(t))
-
 #ifdef BENJI_USE_SERVER_UTILS
     #if defined(_WIN32)
         #define BENJI_SC_ABI __cdecl /* Benji Server Call */
@@ -27,6 +23,7 @@
         typedef SOCKET BENJI_SOCKET;
 
         #define BENJI_SOCKET_ERROR SOCKET_ERROR
+        #define BENJI_INVALID_SOCKET INVALID_SOCKET
 
         BENJI_SC_ABI void winsock_init();
         BENJI_SC_ABI void winsock_cleanup();
@@ -40,6 +37,7 @@
         typedef unsigned long long BENJI_SOCKET;
 
         #define BENJI_SOCKET_ERROR -1
+        #define BENJI_INVALID_SOCKET (BENJI_SOCKET)(~0)
     #endif
 
     #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
@@ -58,6 +56,10 @@
         #define BENJI_CPUID_CPU_NAME_START 0x80000002
     #endif
 #endif
+
+#define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
+
+#define BENJI_CAPACITY(n, t) ((n) * sizeof(t))
 
 #ifdef NOERROR
     #define BENJI_NO_ERROR NOERROR

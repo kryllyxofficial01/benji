@@ -3,6 +3,7 @@
 
 #define BENJI_USE_SERVER_UTILS
 
+#include "client.h"
 #include "cpu_info.h"
 #include "utils.h"
 

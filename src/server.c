@@ -38,15 +38,23 @@ BENJI_SC_ABI BENJI_SOCKET create_server() {
 }
 
 BENJI_SC_ABI void run_server(BENJI_SOCKET server_socket) {
-    cpu_info_t cpu_info = get_cpu_info();
-    map_t* cpu_info_map_data = serialize_cpu_info(cpu_info);
+    // cpu_info_t cpu_info = get_cpu_info();
+    // map_t* cpu_info_map_data = serialize_cpu_info(cpu_info);
 
-    char* cpu_info_json_block = map_make_json_block(cpu_info_map_data, "cpu_info");
+    // char* cpu_info_json_block = map_make_json_block(cpu_info_map_data, "cpu_info");
 
-    char* data = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-    sprintf(data, "{%s}", cpu_info_json_block);
+    // char* data = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+    // sprintf(data, "{%s}", cpu_info_json_block);
 
-    write_to_file("./tests/sysinfo.json", data);
+    // write_to_file("./tests/sysinfo.json", data);
 
-    map_free(cpu_info_map_data);
+    // map_free(cpu_info_map_data);
+
+    BENJI_SOCKET client_socket = accept_client(server_socket);
+
+    char* data = receive_from_client(client_socket);
+
+    printf("%s\n", data);
+
+    close_socket(client_socket);
 }
