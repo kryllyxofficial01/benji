@@ -36,3 +36,11 @@ BENJI_SC_ABI BENJI_SOCKET create_server() {
 
     return server_socket;
 }
+
+BENJI_SC_ABI void run_server(BENJI_SOCKET server_socket) {
+    while (true) {
+        cpu_info_t cpu_info = get_cpu_info();
+
+        // json_t json_data = serialize_cpu_info(cpu_info);
+    }
+}
