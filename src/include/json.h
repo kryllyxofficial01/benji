@@ -5,7 +5,8 @@
 #include <string.h>
 #include <stdint.h>
 
-#define BENJI_JSON_CAPACITY(n, t) (n * sizeof(t))
+#include "utils.h"
+
 #define BENJI_JSON_INITIAL_CAPACITY 1 /* number of key-value pairs to allocate memory for at initiation */
 
 #define BENJI_JSON_KEY_NOT_FOUND -1

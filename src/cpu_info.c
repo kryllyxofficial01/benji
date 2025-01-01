@@ -15,7 +15,7 @@ cpu_info_t get_cpu_info() {
 const char* get_cpu_name() {
     #if defined(_WIN32)
         int cpuid_info[BENJI_CPUID_CPU_NAME_BUFFER_LENGTH];
-        char* cpu_name = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
+        char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
         cpu_name[0] = '\0';
 
@@ -66,7 +66,7 @@ size_t get_cpu_logical_processors_count() {
 json_t* serialize_cpu_info(cpu_info_t cpu_info) {
     json_t* cpu_info_json = json_init();
 
-    char* buffer = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
+    char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     buffer[0] = '\0';
 
     json_insert(cpu_info_json, "cpu_name", cpu_info.name);

@@ -27,7 +27,7 @@ size_t splitstr(const char* string, char*** tokens, const char* character) {
     char* token = strtok(temp_string, character);
 
     while (token != NULL) {
-        char** temp_tokens = realloc(*tokens, (token_count + 1) * sizeof(char*));
+        char** temp_tokens = realloc(*tokens, BENJI_CAPACITY(token_count + 1, char*));
 
         if (temp_tokens == NULL) {
             free(temp_tokens);

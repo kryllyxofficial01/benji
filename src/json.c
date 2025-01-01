@@ -3,8 +3,8 @@
 json_t* json_init() {
     json_t* json = malloc(sizeof(json_t));
 
-    json->keys = malloc(BENJI_JSON_CAPACITY(BENJI_JSON_INITIAL_CAPACITY, char*));
-    json->values = malloc(BENJI_JSON_CAPACITY(BENJI_JSON_INITIAL_CAPACITY, char*));
+    json->keys = malloc(BENJI_CAPACITY(BENJI_JSON_INITIAL_CAPACITY, char*));
+    json->values = malloc(BENJI_CAPACITY(BENJI_JSON_INITIAL_CAPACITY, char*));
 
     json->size = 0;
     json->capacity = BENJI_JSON_INITIAL_CAPACITY;
@@ -53,8 +53,8 @@ int json_get_index_of(json_t* json, const char* key) {
 }
 
 void json_resize(json_t* json, size_t new_capacity) {
-    json->keys = realloc(json->keys, BENJI_JSON_CAPACITY(new_capacity, char*));
-    json->values = realloc(json->values, BENJI_JSON_CAPACITY(new_capacity, char*));
+    json->keys = realloc(json->keys, BENJI_CAPACITY(new_capacity, char*));
+    json->values = realloc(json->values, BENJI_CAPACITY(new_capacity, char*));
 
     json->capacity = new_capacity;
 }

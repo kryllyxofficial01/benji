@@ -19,6 +19,8 @@
 
 #define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
 
+#define BENJI_CAPACITY(n, t) ((n) * sizeof(t))
+
 #ifdef BENJI_USE_SERVER_UTILS
     #if defined(_WIN32)
         #define BENJI_SC_ABI __cdecl /* Benji Server Call */

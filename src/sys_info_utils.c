@@ -4,7 +4,7 @@
 
 #if defined(_WIN32)
     const char* wmi_get_data(enum BENJI_WMI_TYPE type, enum BENJI_WMI_ENTRY entry) {
-        char* command = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
+        char* command = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
         command[0] = '\0';
 
@@ -47,8 +47,8 @@
             return NULL;
         }
         else {
-            char* output = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
-            char* buffer = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
+            char* output = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+            char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
             output[0] = '\0';
             buffer[0] = '\0';
