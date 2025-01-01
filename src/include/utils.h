@@ -17,6 +17,8 @@
     #define BENJI_NO_ERROR 0
 #endif
 
+#define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
+
 #ifdef BENJI_USE_SERVER_UTILS
     #if defined(_WIN32)
         #define BENJI_SC_ABI __cdecl /* Benji Server Call */
@@ -54,6 +56,11 @@
 
 #ifdef BENJI_USE_SYS_INFO_UTILS
     #if defined(_WIN32)
+        // are these too long? i think these are too long
+        #define BENJI_CPUID_CPU_NAME_BUFFER_LENGTH 4
+        #define BENJI_CPUID_CPU_NAME_SECTIONS_COUNT 3
+        #define BENJI_CPUID_CPU_NAME_START 0x80000002
+
         enum BENJI_WMI_TYPE {
             WMI_WIN32_PROCESSOR,
             WMI_WIN32_VIDEOCONTROLLER

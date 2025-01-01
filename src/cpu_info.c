@@ -14,19 +14,15 @@ cpu_info_t get_cpu_info() {
 
 const char* get_cpu_name() {
     #if defined(_WIN32)
-        int cpuid_info[4];
-        char* cpu_name = malloc(0x40 * sizeof(char));
+        int cpuid_info[BENJI_CPUID_CPU_NAME_BUFFER_LENGTH];
+        char* cpu_name = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
 
-        memset(cpu_name, 0, sizeof(cpu_name));
+        cpu_name[0] = '\0';
 
-        __cpuid(cpuid_info, 0x80000002);
-        memcpy(cpu_name, cpuid_info, sizeof(cpuid_info));
-
-        __cpuid(cpuid_info, 0x80000003);
-        memcpy(cpu_name + 16, cpuid_info, sizeof(cpuid_info));
-
-        __cpuid(cpuid_info, 0x80000004);
-        memcpy(cpu_name + 32, cpuid_info, sizeof(cpuid_info));
+        for (int i = 0; i < BENJI_CPUID_CPU_NAME_SECTIONS_COUNT; ++i) {
+            __cpuid(cpuid_info, BENJI_CPUID_CPU_NAME_START + i);
+            memcpy(cpu_name + (i * 16), cpuid_info, sizeof(cpuid_info));
+        }
 
         return cpu_name;
     #endif
@@ -70,14 +66,14 @@ size_t get_cpu_logical_processors_count() {
 json_t* serialize_cpu_info(cpu_info_t cpu_info) {
     json_t* cpu_info_json = json_init();
 
-    char* buffer = malloc(1024 * sizeof(char));
+    char* buffer = malloc(BENJI_BASIC_STRING_LENGTH * sizeof(char));
     buffer[0] = '\0';
 
     json_insert(cpu_info_json, "cpu_name", cpu_info.name);
 
     json_insert(cpu_info_json, "cpu_arch", cpu_info.arch);
 
-    sprintf(buffer, "%f", cpu_info.clock_speed);
+    sprintf(buffer, "%0.3f", cpu_info.clock_speed);
     json_insert(cpu_info_json, "cpu_clock_speed", buffer);
 
     sprintf(buffer, "%li", cpu_info.core_count);
