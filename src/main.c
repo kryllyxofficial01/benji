@@ -7,9 +7,9 @@ int main(int argc, const char* argv[]) {
         winsock_init();
     #endif
 
-    BENJI_SOCKET server_socket = create_server();
+    BENJI_SOCKET server_socket = server_init();
 
-    run_server(server_socket);
+    server_run(server_socket);
 
     close_socket(server_socket);
 }

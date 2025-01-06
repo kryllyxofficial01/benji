@@ -1,6 +1,6 @@
 #include "include/server.h"
 
-BENJI_SC_ABI BENJI_SOCKET create_server() {
+BENJI_SC_ABI BENJI_SOCKET server_init() {
     struct sockaddr_in server_address;
 
     server_address.sin_family = AF_INET; // ipv4 address family
@@ -10,6 +10,8 @@ BENJI_SC_ABI BENJI_SOCKET create_server() {
     #elif defined(__linux__)
         server_address.sin_addr.s_addr = INADDR_ANY;
     #endif
+
+    server_status = BENJI_SERVER_STOPPED;
 
     printf("Creating server socket ... ");
 
@@ -34,14 +36,16 @@ BENJI_SC_ABI BENJI_SOCKET create_server() {
 
     printf("Server created at '127.0.0.1:%d'\n", ntohs(server_address.sin_port));
 
+    server_status = BENJI_SERVER_RUNNING;
+
     return server_socket;
 }
 
-BENJI_SC_ABI void run_server(BENJI_SOCKET server_socket) {
+BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
     // cpu_info_t cpu_info = get_cpu_info();
-    // map_t* cpu_info_map_data = serialize_cpu_info(cpu_info);
+    // map_t* cpu_info_map_data = cpu_info_to_map(cpu_info);
 
-    // char* cpu_info_json_block = map_make_json_block(cpu_info_map_data, "cpu_info");
+    // char* cpu_info_json_block = map_serialize(cpu_info_map_data, "cpu_info");
 
     // char* data = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     // sprintf(data, "{%s}", cpu_info_json_block);
@@ -50,11 +54,38 @@ BENJI_SC_ABI void run_server(BENJI_SOCKET server_socket) {
 
     // map_free(cpu_info_map_data);
 
-    BENJI_SOCKET client_socket = accept_client(server_socket);
+    while (server_status == BENJI_SERVER_RUNNING) {
+        BENJI_SOCKET client_socket = server_accept_client(server_socket);
 
-    char* data = receive_from_client(client_socket);
+        char* data = server_receive_from_client(client_socket);
+        char** data_groups = NULL;
 
-    printf("%s\n", data);
+        size_t data_group_count = server_parse_client_data(data, &data_groups);
 
-    close_socket(client_socket);
+        close_socket(client_socket);
+    }
+}
+
+BENJI_SC_ABI BENJI_SOCKET server_accept_client(BENJI_SOCKET server_socket) {
+    struct sockaddr_storage client;
+
+    socklen_t client_length = sizeof(client);
+
+    BENJI_SOCKET client_socket = accept(server_socket, (struct sockaddr*) &client, &client_length);
+
+    return (client_socket != BENJI_INVALID_SOCKET) ? client_socket : 0;
+}
+
+BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
+    char buffer[BENJI_BASIC_STRING_LENGTH];
+
+    return (recv(client_socket, buffer, sizeof(buffer), 0) != BENJI_SOCKET_ERROR) ? buffer : "";
+}
+
+BENJI_SC_ABI void server_send_to_client(BENJI_SOCKET client_socket, const char* data) {
+
+}
+
+size_t server_parse_client_data(const char* client_data, char*** data_groups) {
+    return splitstr(client_data, data_groups, ";");
 }

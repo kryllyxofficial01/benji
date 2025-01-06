@@ -128,7 +128,7 @@ static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* 
     return __popcnt(info->ProcessorMask);
 }
 
-map_t* serialize_cpu_info(cpu_info_t cpu_info) {
+map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     map_t* cpu_info_map = map_init();
 
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));

@@ -40,6 +40,11 @@
         #define BENJI_INVALID_SOCKET (BENJI_SOCKET)(~0)
     #endif
 
+    static enum BENJISERVERSTATUS {
+        BENJI_SERVER_STOPPED,
+        BENJI_SERVER_RUNNING
+    } server_status;
+
     #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
 
     BENJI_SC_ABI BENJI_SOCKET create_socket();

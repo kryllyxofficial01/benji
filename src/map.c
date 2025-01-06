@@ -52,7 +52,7 @@ int map_get_index_of(map_t* map, const char* key) {
     return BENJI_MAP_KEY_NOT_FOUND;
 }
 
-char* map_make_json_block(map_t* map, const char* header) {
+char* map_serialize(map_t* map, const char* header) {
     char* block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH * map->capacity, char));
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
