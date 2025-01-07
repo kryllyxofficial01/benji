@@ -55,20 +55,24 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
         json[0] = '\0';
 
         for (size_t i = 0; i < data_group_count; i++) {
-            char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+            map_t* map_data;
+            char* header;
 
             if (strcmp(data_groups[i], "cpu_all") == 0) {
                 cpu_info_t cpu_info = get_cpu_info();
-                map_t* cpu_info_map_data = cpu_info_to_map(cpu_info);
+                map_data = cpu_info_to_map(cpu_info);
 
-                sprintf(json_block, "%s,", map_serialize(cpu_info_map_data, "cpu_info"));
-
-                strcat(json, json_block);
-
-                map_free(cpu_info_map_data);
+                header = "cpu_info";
             }
 
+            char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+
+            sprintf(json_block, "%s,", map_serialize(map_data, header));
+
+            strcat(json, json_block);
+
             free(json_block);
+            map_free(map_data);
         }
 
         size_t json_length = strlen(json);
