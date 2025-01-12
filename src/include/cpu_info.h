@@ -22,8 +22,6 @@ typedef struct CPUINFO {
     // double current_temp; // TBD until i figure out how
 } cpu_info_t;
 
-typedef DWORD (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
-
 cpu_info_t get_cpu_info();
 
 char* get_cpu_name();
@@ -32,9 +30,11 @@ double get_cpu_clock_speed();
 int get_cpu_core_count();
 int get_cpu_logical_processors_count();
 
-static int get_cpu_processor_info(processor_info_callback_t callback);
-static DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
-static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
+#ifdef _WIN32
+    static int get_cpu_processor_info(processor_info_callback_t callback);
+    static DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
+    static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
+#endif
 
 map_t* cpu_info_to_map(cpu_info_t cpu_info);
 
