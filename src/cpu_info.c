@@ -109,44 +109,46 @@ int get_cpu_logical_processors_count() {
     #endif
 }
 
-static int get_cpu_processor_info(processor_info_callback_t callback) {
-    DWORD length = 0;
+#ifdef _WIN32
+    static int get_cpu_processor_info(processor_info_callback_t callback) {
+        DWORD length = 0;
 
-    GetLogicalProcessorInformation(NULL, &length);
+        GetLogicalProcessorInformation(NULL, &length);
 
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
+        SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
 
-    if (!buffer) {
-        return -1;
-    }
+        if (!buffer) {
+            return -1;
+        }
 
-    if (!GetLogicalProcessorInformation(buffer, &length)) {
+        if (!GetLogicalProcessorInformation(buffer, &length)) {
+            free(buffer);
+
+            return -1;
+        }
+
+        DWORD result = 0;
+
+        size_t count = length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
+        for (size_t i = 0; i < count; i++) {
+            if (buffer[i].Relationship == RelationProcessorCore) {
+                result += callback(&buffer[i]);
+            }
+        }
+
         free(buffer);
 
-        return -1;
+        return result;
     }
 
-    DWORD result = 0;
-
-    size_t count = length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
-    for (size_t i = 0; i < count; i++) {
-        if (buffer[i].Relationship == RelationProcessorCore) {
-            result += callback(&buffer[i]);
-        }
+    static DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
+        return 1;
     }
 
-    free(buffer);
-
-    return result;
-}
-
-static DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
-    return 1;
-}
-
-static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
-    return __popcnt(info->ProcessorMask);
-}
+    static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
+        return __popcnt(info->ProcessorMask);
+    }
+#endif
 
 map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     map_t* cpu_info_map = map_init();
