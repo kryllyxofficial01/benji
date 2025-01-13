@@ -6,6 +6,9 @@ cpu_info_t get_cpu_info() {
     info.name = get_cpu_name();
     strtrim(info.name);
 
+    info.vendor = get_cpu_vendor();
+    strtrim(info.vendor);
+
     info.arch = get_cpu_arch();
     strtrim(info.name);
 
@@ -18,7 +21,7 @@ cpu_info_t get_cpu_info() {
 
 char* get_cpu_name() {
     #if defined(_WIN32)
-        int cpuid_info[BENJI_CPUID_CPU_NAME_BUFFER_LENGTH];
+        int cpuid_info[BENJI_CPUID_BUFFER_LENGTH];
         char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
         cpu_name[0] = '\0';
@@ -30,6 +33,23 @@ char* get_cpu_name() {
 
         return cpu_name;
     #endif
+}
+
+char* get_cpu_vendor() {
+    int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
+    char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+
+    cpu_vendor[0] = '\0';
+
+    __cpuid(cpu_info, 0);
+
+    *((int*) cpu_vendor) = cpu_info[1];
+    *((int*) (cpu_vendor + 4)) = cpu_info[3];
+    *((int*) (cpu_vendor + 8)) = cpu_info[2];
+
+    cpu_vendor[strlen(cpu_vendor) - 1] = '\0';
+
+    return cpu_vendor;
 }
 
 char* get_cpu_arch() {
@@ -135,6 +155,8 @@ map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     buffer[0] = '\0';
 
     map_insert(cpu_info_map, "cpu_name", cpu_info.name);
+
+    map_insert(cpu_info_map, "cpu_vendor", cpu_info.vendor);
 
     map_insert(cpu_info_map, "cpu_arch", cpu_info.arch);
 

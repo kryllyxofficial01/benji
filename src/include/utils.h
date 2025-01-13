@@ -55,8 +55,10 @@
 
 #ifdef BENJI_USE_SYS_INFO_UTILS
     #if defined(_WIN32)
+        #include <dxgi.h>
+
         // are these too long? i think these are too long
-        #define BENJI_CPUID_CPU_NAME_BUFFER_LENGTH 4
+        #define BENJI_CPUID_BUFFER_LENGTH 4
         #define BENJI_CPUID_CPU_NAME_SECTIONS_COUNT 3
         #define BENJI_CPUID_CPU_NAME_START 0x80000002
     #endif
@@ -73,7 +75,7 @@
 #endif
 
 void strtrim(char* string);
-size_t splitstr(const char* string, char*** tokens, const char* character); // returns token count
+size_t splitstr(const char* string, char*** tokens, const char character); // returns token count
 
 void write_to_file(const char* filepath, const char* data);
 

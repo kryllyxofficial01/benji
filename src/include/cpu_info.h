@@ -13,8 +13,9 @@
     #include <unistd.h>
 #endif
 
-typedef struct CPUINFO {
+typedef struct BENJICPUINFO {
     char* name;
+    char* vendor;
     char* arch;
     double clock_speed; // in GHz
     size_t core_count;
@@ -27,6 +28,7 @@ typedef DWORD (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*
 cpu_info_t get_cpu_info();
 
 char* get_cpu_name();
+char* get_cpu_vendor();
 char* get_cpu_arch();
 double get_cpu_clock_speed();
 int get_cpu_core_count();

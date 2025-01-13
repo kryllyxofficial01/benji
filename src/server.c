@@ -46,9 +46,11 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
         BENJI_SOCKET client_socket = server_accept_client(server_socket);
 
         char* data = server_receive_from_client(client_socket);
-        char** data_groups = NULL;
+        char** data_groups;
 
         size_t data_group_count = server_parse_client_data(data, &data_groups);
+
+        printf("%s\n", data_groups[data_group_count - 1]);
 
         char* json = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
@@ -63,6 +65,12 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
                 map_data = cpu_info_to_map(cpu_info);
 
                 header = "cpu_info";
+            }
+            else if (strcmp(data_groups[i], "gpu_all") == 0) {
+                gpu_info_t gpu_info = get_gpu_info();
+                // map_data = gpu_info_to_map(gpu_info);
+
+                header = "gpu_info";
             }
 
             char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
@@ -135,5 +143,5 @@ BENJI_SC_ABI int server_send_to_client(BENJI_SOCKET client_socket, const char* d
 }
 
 size_t server_parse_client_data(const char* client_data, char*** data_groups) {
-    return splitstr(client_data, data_groups, ";");
+    return splitstr(client_data, data_groups, ';');
 }
