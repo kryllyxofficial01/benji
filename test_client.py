@@ -4,6 +4,7 @@ host = "127.0.0.1"
 port = int(input("port: "))
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 server_socket.connect((host, port))
 
 try:

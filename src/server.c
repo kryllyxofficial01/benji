@@ -103,12 +103,19 @@ BENJI_SC_ABI BENJI_SOCKET server_accept_client(BENJI_SOCKET server_socket) {
 
     BENJI_SOCKET client_socket = accept(server_socket, (struct sockaddr*) &client, &client_length);
 
-    return (client_socket != BENJI_INVALID_SOCKET) ? client_socket : 0;
+    if (client_socket == BENJI_INVALID_SOCKET) {
+        return 0;
+    }
+
+    u_long non_blocking_mode = true;
+    ioctlsocket(client_socket, FIONBIO, &non_blocking_mode);
+
+    return client_socket;
 }
 
 BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
-    char* data = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-    data[0] = '\0';
+    char* data = NULL;
+    size_t data_size = 0;
 
     char buffer[BENJI_BASIC_STRING_LENGTH];
 
@@ -119,7 +126,16 @@ BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
         // check if all data has been received
         if (bytes_received > 0) {
             buffer[bytes_received] = '\0';
-            strcat(data, buffer);
+
+            data = realloc(data, data_size + bytes_received + 1);
+
+            if (data == NULL) {
+                return NULL;
+            }
+
+            strcpy(data + data_size, buffer);
+
+            data_size += bytes_received;
         }
         else if (bytes_received == SOCKET_ERROR) {
             return data; // if an error is encountered, just return whatever we did get
