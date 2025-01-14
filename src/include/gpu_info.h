@@ -15,6 +15,11 @@ typedef struct BENJIGPUINFO {
     double shared_system_memory;
 } gpu_info_t;
 
+struct BENJIGPUDATA {
+    DISPLAY_DEVICE device;
+    DXGI_ADAPTER_DESC description;
+};
+
 gpu_info_t get_gpu_info();
 
 char* get_gpu_name();
@@ -23,7 +28,7 @@ double get_gpu_dedicated_video_memory();
 double get_gpu_dedicated_system_memory();
 double get_gpu_shared_system_memory();
 
-DXGI_ADAPTER_DESC get_gpu_data();
+struct BENJIGPUDATA get_gpu_data();
 
 map_t* gpu_info_to_map(gpu_info_t gpu_info);
 

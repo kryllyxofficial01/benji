@@ -54,9 +54,9 @@ int map_get_index_of(map_t* map, const char* key) {
 
 char* map_serialize(map_t* map, const char* header) {
     char* block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH * map->capacity, char));
-    char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-
     block[0] = '\0';
+
+    char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     buffer[0] = '\0';
 
     sprintf(buffer, "\"%s\": {", header);

@@ -50,10 +50,7 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
 
         size_t data_group_count = server_parse_client_data(data, &data_groups);
 
-        printf("%s\n", data_groups[data_group_count - 1]);
-
         char* json = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-
         json[0] = '\0';
 
         for (size_t i = 0; i < data_group_count; i++) {
@@ -68,7 +65,7 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
             }
             else if (strcmp(data_groups[i], "gpu_all") == 0) {
                 gpu_info_t gpu_info = get_gpu_info();
-                // map_data = gpu_info_to_map(gpu_info);
+                map_data = gpu_info_to_map(gpu_info);
 
                 header = "gpu_info";
             }
@@ -110,36 +107,30 @@ BENJI_SC_ABI BENJI_SOCKET server_accept_client(BENJI_SOCKET server_socket) {
 }
 
 BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
-    char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+    char* data = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+    data[0] = '\0';
 
-    buffer[0] = '\0';
+    char buffer[BENJI_BASIC_STRING_LENGTH];
 
-    size_t received_bytes = recv(client_socket, buffer, sizeof(buffer), 0);
+    size_t bytes_received = 0;
+    do {
+        bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
 
-    if (received_bytes != BENJI_SOCKET_ERROR) {
-        buffer[received_bytes] = '\0';
-        return buffer;
-    }
-    else {
-        return "";
-    }
+        // check if all data has been received
+        if (bytes_received > 0) {
+            buffer[bytes_received] = '\0';
+            strcat(data, buffer);
+        }
+        else if (bytes_received == SOCKET_ERROR) {
+            return data; // if an error is encountered, just return whatever we did get
+        }
+    } while (bytes_received > 0);
+
+    return data;
 }
 
 BENJI_SC_ABI int server_send_to_client(BENJI_SOCKET client_socket, const char* data) {
-    unsigned int tries = 0;
-
-    retry: {
-        if (send(client_socket, data, strlen(data) + 1, 0) == BENJI_SOCKET_ERROR) {
-            if (tries < 3) {
-                tries++;
-
-                goto retry;
-            }
-            else if (tries == 3) {
-                return -1;
-            }
-        }
-    }
+    return send(client_socket, data, strlen(data) + 1, 0);
 }
 
 size_t server_parse_client_data(const char* client_data, char*** data_groups) {

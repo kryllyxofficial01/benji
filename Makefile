@@ -1,6 +1,6 @@
 GXX = gcc
 
-GXX_FLAGS = -g
+GXX_FLAGS = -g -Wall -Werror -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-variable -Wno-unused-value
 LINKED_LIBS = -lWs2_32 -ldxgi -ldxguid
 
 BUILD = build

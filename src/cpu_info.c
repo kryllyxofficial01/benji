@@ -22,8 +22,8 @@ cpu_info_t get_cpu_info() {
 char* get_cpu_name() {
     #if defined(_WIN32)
         int cpuid_info[BENJI_CPUID_BUFFER_LENGTH];
-        char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
+        char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
         cpu_name[0] = '\0';
 
         for (int i = 0; i < BENJI_CPUID_CPU_NAME_SECTIONS_COUNT; ++i) {
@@ -37,8 +37,8 @@ char* get_cpu_name() {
 
 char* get_cpu_vendor() {
     int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
-    char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
+    char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     cpu_vendor[0] = '\0';
 
     __cpuid(cpu_info, 0);
@@ -53,20 +53,24 @@ char* get_cpu_vendor() {
 }
 
 char* get_cpu_arch() {
+    char* arch;
+
     #if defined(_WIN32)
         SYSTEM_INFO system_info;
 
         GetSystemInfo(&system_info);
 
         switch (system_info.wProcessorArchitecture) {
-            case PROCESSOR_ARCHITECTURE_AMD64: return "x64";
-            case PROCESSOR_ARCHITECTURE_ARM: return "ARM";
-            case PROCESSOR_ARCHITECTURE_ARM64: return "ARM64";
-            case PROCESSOR_ARCHITECTURE_IA64: return "IA-64";
-            case PROCESSOR_ARCHITECTURE_INTEL: return "x86";
-            case PROCESSOR_ARCHITECTURE_UNKNOWN: return "???";
+            case PROCESSOR_ARCHITECTURE_AMD64: arch = "x64"; break;
+            case PROCESSOR_ARCHITECTURE_ARM: arch = "ARM"; break;
+            case PROCESSOR_ARCHITECTURE_ARM64: arch = "ARM64"; break;
+            case PROCESSOR_ARCHITECTURE_IA64: arch = "IA-64"; break;
+            case PROCESSOR_ARCHITECTURE_INTEL: arch = "x86"; break;
+            case PROCESSOR_ARCHITECTURE_UNKNOWN: arch = "???"; break;
         }
     #endif
+
+    return arch;
 }
 
 double get_cpu_clock_speed() {
@@ -109,47 +113,6 @@ int get_cpu_logical_processors_count() {
     #endif
 }
 
-#ifdef _WIN32
-    static int get_cpu_processor_info(processor_info_callback_t callback) {
-        DWORD length = 0;
-
-        GetLogicalProcessorInformation(NULL, &length);
-
-        SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
-
-        if (!buffer) {
-            return -1;
-        }
-
-        if (!GetLogicalProcessorInformation(buffer, &length)) {
-            free(buffer);
-
-            return -1;
-        }
-
-        DWORD result = 0;
-
-        size_t count = length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
-        for (size_t i = 0; i < count; i++) {
-            if (buffer[i].Relationship == RelationProcessorCore) {
-                result += callback(&buffer[i]);
-            }
-        }
-
-        free(buffer);
-
-        return result;
-    }
-
-    static DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
-        return 1;
-    }
-
-    static DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
-        return __popcnt(info->ProcessorMask);
-    }
-#endif
-
 map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     map_t* cpu_info_map = map_init();
 
@@ -157,18 +120,16 @@ map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     buffer[0] = '\0';
 
     map_insert(cpu_info_map, "cpu_name", cpu_info.name);
-
     map_insert(cpu_info_map, "cpu_vendor", cpu_info.vendor);
-
     map_insert(cpu_info_map, "cpu_arch", cpu_info.arch);
 
     sprintf(buffer, "%0.3f", cpu_info.clock_speed);
     map_insert(cpu_info_map, "cpu_clock_speed", buffer);
 
-    sprintf(buffer, "%li", cpu_info.core_count);
+    sprintf(buffer, "%lli", cpu_info.core_count);
     map_insert(cpu_info_map, "cpu_core_count", buffer);
 
-    sprintf(buffer, "%li", cpu_info.logical_processors_count);
+    sprintf(buffer, "%lli", cpu_info.logical_processors_count);
     map_insert(cpu_info_map, "cpu_logical_processors_count", buffer);
 
     free(buffer);

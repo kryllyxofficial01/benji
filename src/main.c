@@ -7,15 +7,6 @@ int main(int argc, const char* argv[]) {
         winsock_init();
     #endif
 
-    const char* string = "cpu_all;gpu_all";
-    char** tokens;
-
-    int count = splitstr(string, &tokens, ';');
-
-    for (int i = 0; i < count; i++) {
-        printf("%s\n", tokens[i]);
-    }
-
     BENJI_SOCKET server_socket = server_init();
 
     server_run(server_socket);

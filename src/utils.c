@@ -17,72 +17,38 @@ void strtrim(char* string) {
 }
 
 size_t splitstr(const char* string, char*** tokens, const char character) {
-    // char* temp_string = strdup(string);
+    int string_length = strlen(string);
+    size_t count = 0;
 
-    // if (temp_string == NULL) {
-    //     return 0;
-    // }
-
-    // size_t token_count = 0;
-    // char* token = strtok(temp_string, character);
-
-    // while (token != NULL) {
-    //     char** temp_tokens = realloc(*tokens, BENJI_CAPACITY(token_count + 1, char*));
-
-    //     if (temp_tokens == NULL) {
-    //         free(temp_tokens);
-
-    //         break;
-    //     }
-
-    //     *tokens = temp_tokens;
-
-    //     (*tokens)[token_count] = strdup(token);
-
-    //     if ((*tokens)[token_count] == NULL) {
-    //         break;
-    //     }
-
-    //     token_count++;
-    //     token = strtok(NULL, character);
-    // }
-
-    // free(temp_string);
-
-    // return token_count;
-
-    int len = strlen(string);
-    int start = 0, count = 0;
-
-    // Count the number of tokens by counting occurrences of the delimiter
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < string_length; i++) {
         if (string[i] == character) {
             count++;
         }
     }
-
-    // The number of tokens is the number of delimiters + 1
     count++;
 
-    // Allocate memory for the array of token pointers
-    *tokens = (char **)malloc(count * sizeof(char *));
+    *tokens = (char**) malloc(BENJI_CAPACITY(count, char*));
     if (*tokens == NULL) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
+        return 0; // return 0 cause we havent processed any tokens yet
     }
 
-    int index = 0;
-    for (int i = 0; i <= len; i++) {
+    int index = 0, start = 0;
+    for (int i = 0; i < string_length; i++) {
         if (string[i] == character || string[i] == '\0') {
-            int tokenLen = i - start;
-            (*tokens)[index] = (char *)malloc((tokenLen + 1) * sizeof(char));
+            int token_length = i - start;
+
+            (*tokens)[index] = (char*) malloc(BENJI_CAPACITY(token_length + 1, char));
+
             if ((*tokens)[index] == NULL) {
-                perror("Memory allocation failed");
-                exit(EXIT_FAILURE);
+                return count; // return how ever many tokens we may have gotten
             }
-            strncpy((*tokens)[index], string + start, tokenLen);
-            (*tokens)[index][tokenLen] = '\0'; // Null-terminate the token
+
+            strncpy((*tokens)[index], string + start, token_length);
+
+            (*tokens)[index][token_length] = '\0';
+
             start = i + 1;
+
             index++;
         }
     }
