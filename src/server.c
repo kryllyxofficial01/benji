@@ -118,29 +118,45 @@ BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
     size_t data_size = 0;
 
     char buffer[BENJI_BASIC_STRING_LENGTH];
-
     size_t bytes_received = 0;
+
+    unsigned int tries = 0;
+
     do {
         bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
 
-        // check if all data has been received
-        if (bytes_received > 0) {
-            buffer[bytes_received] = '\0';
+        if (bytes_received == BENJI_SOCKET_ERROR) {
+            if (WSAGetLastError() == WSAEWOULDBLOCK) {
+                if (tries < BENJI_MAX_TRIES) {
+                    tries++;
 
-            data = realloc(data, data_size + bytes_received + 1);
+                    Sleep(50); // wait 50ms and try again
 
-            if (data == NULL) {
-                return NULL;
+                    continue; // no data is available, just try again
+                }
+                else {
+                    break;
+                }
             }
-
-            strcpy(data + data_size, buffer);
-
-            data_size += bytes_received;
         }
-        else if (bytes_received == SOCKET_ERROR) {
-            return data; // if an error is encountered, just return whatever we did get
+
+        buffer[bytes_received] = '\0';
+
+        printf("Chunk received (%lli bytes): %s\n", bytes_received, buffer);
+
+        data = realloc(data, data_size + bytes_received + 1);
+        if (data == NULL) {
+            free(data);
+
+            return "";
         }
+
+        memcpy(data + data_size, buffer, bytes_received + 1);
+
+        data_size += bytes_received;
     } while (bytes_received > 0);
+
+    printf("Full data received (%lli bytes): %s\n", data_size, data);
 
     return data;
 }

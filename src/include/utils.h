@@ -46,6 +46,7 @@
     } server_status;
 
     #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
+    #define BENJI_MAX_TRIES 3 /* max attempts to try something */
 
     BENJI_SC_ABI BENJI_SOCKET create_socket();
     BENJI_SC_ABI void close_socket(BENJI_SOCKET sock);
