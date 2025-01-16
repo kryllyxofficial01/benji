@@ -9,6 +9,8 @@
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */
+
+    #include <windows.h>
 #endif
 
 #ifdef BENJI_USE_SERVER_UTILS
@@ -84,6 +86,8 @@
 
 void strtrim(char* string);
 size_t splitstr(const char* string, char*** tokens, const char character); // returns token count
+
+char* wcharp_to_charp(const WCHAR* wchar);
 
 void write_to_file(const char* filepath, const char* data);
 

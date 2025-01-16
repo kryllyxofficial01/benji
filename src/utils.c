@@ -34,7 +34,7 @@ size_t splitstr(const char* string, char*** tokens, const char character) {
 
     int index = 0, start = 0;
     for (int i = 0; i < string_length; i++) {
-        if (string[i] == character || string[i] == '\0') {
+        if (string[i] == character) {
             int token_length = i - start;
 
             (*tokens)[index] = (char*) malloc(BENJI_CAPACITY(token_length + 1, char));
@@ -54,6 +54,28 @@ size_t splitstr(const char* string, char*** tokens, const char character) {
     }
 
     return count;  // Return the number of tokens
+}
+
+char* wcharp_to_charp(const WCHAR* wchar) {
+    if (wchar == NULL) {
+        return NULL;
+    }
+
+    int size = WideCharToMultiByte(CP_UTF8, 0, wchar, -1, NULL, 0, NULL, NULL);
+
+    if (size == 0) {
+        return NULL;
+    }
+
+    char* string = malloc(size);
+
+    if (string == NULL) {
+        return NULL;
+    }
+
+    WideCharToMultiByte(CP_UTF8, 0, wchar, -1, string, size, NULL, NULL);
+
+    return string;
 }
 
 void write_to_file(const char* filepath, const char* data) {

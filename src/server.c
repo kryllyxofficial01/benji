@@ -71,6 +71,7 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
             }
 
             char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+            json_block[0] = '\0';
 
             sprintf(json_block, "%s,", map_serialize(map_data, header));
 
@@ -142,8 +143,6 @@ BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
 
         buffer[bytes_received] = '\0';
 
-        printf("Chunk received (%lli bytes): %s\n", bytes_received, buffer);
-
         data = realloc(data, data_size + bytes_received + 1);
         if (data == NULL) {
             free(data);
@@ -155,8 +154,6 @@ BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
 
         data_size += bytes_received;
     } while (bytes_received > 0);
-
-    printf("Full data received (%lli bytes): %s\n", data_size, data);
 
     return data;
 }

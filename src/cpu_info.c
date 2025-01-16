@@ -47,7 +47,7 @@ char* get_cpu_vendor() {
     *((int*) (cpu_vendor + 4)) = cpu_info[3];
     *((int*) (cpu_vendor + 8)) = cpu_info[2];
 
-    cpu_vendor[strlen(cpu_vendor) - 1] = '\0';
+    cpu_vendor[strlen(cpu_vendor) - 2] = '\0';
 
     return cpu_vendor;
 }

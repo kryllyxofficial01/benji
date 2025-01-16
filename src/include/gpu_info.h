@@ -16,7 +16,7 @@ typedef struct BENJIGPUINFO {
 } gpu_info_t;
 
 struct BENJIGPUDATA {
-    DISPLAY_DEVICE device;
+    DISPLAY_DEVICEW device;
     DXGI_ADAPTER_DESC description;
 };
 

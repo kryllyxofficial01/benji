@@ -17,29 +17,49 @@ gpu_info_t get_gpu_info() {
 }
 
 char* get_gpu_name() {
-    return get_gpu_data().device.DeviceName;
+    #ifdef _WIN32
+        DISPLAY_DEVICEW device;
+        device.cb = sizeof(DISPLAY_DEVICEW);
+
+        for (int i = 0; EnumDisplayDevicesW(NULL, i, &device, 0); i++) {
+            // get the primary GPU
+            if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
+                return wcharp_to_charp(device.DeviceString);
+            }
+        }
+
+        return NULL;
+    #endif
 }
 
 char* get_gpu_vendor() {
-    switch (get_gpu_data().description.VendorId) {
-        case BENJI_GPU_VENDOR_INTEL: return "Intel";
-        case BENJI_GPU_VENDOR_AMD: return "AMD";
-        case BENJI_GPU_VENDOR_NVIDIA: return "NVIDIA";
+    #ifdef _WIN32
+        switch (get_gpu_data().description.VendorId) {
+            case BENJI_GPU_VENDOR_INTEL: return "Intel";
+            case BENJI_GPU_VENDOR_AMD: return "AMD";
+            case BENJI_GPU_VENDOR_NVIDIA: return "NVIDIA";
 
-        default: return "???";
-    }
+            default: return "???";
+        }
+    #endif
 }
 
 double get_gpu_dedicated_video_memory() {
-    return (get_gpu_data().description.DedicatedVideoMemory / (1024 * 1024)) / 1000;
+    #ifdef _WIN32
+        return (get_gpu_data().description.DedicatedVideoMemory / (1024 * 1024)) / 1000;
+    #endif
 }
 
 double get_gpu_dedicated_system_memory() {
-    return (get_gpu_data().description.DedicatedSystemMemory/ (1024 * 1024)) / 1000;
+    #ifdef _WIN32
+        return (get_gpu_data().description.DedicatedSystemMemory/ (1024 * 1024)) / 1000;
+    #endif
 }
 
 double get_gpu_shared_system_memory() {
-    return (get_gpu_data().description.SharedSystemMemory / (1024 * 1024)) / 1000;
+    #ifdef _WIN32
+        return (get_gpu_data().description.SharedSystemMemory / (1024 * 1024)) / 1000;
+    #endif
 }
 
 struct BENJIGPUDATA get_gpu_data() {
@@ -55,16 +75,21 @@ struct BENJIGPUDATA get_gpu_data() {
 
     IDXGIAdapter* adapter = NULL;
 
-    DISPLAY_DEVICE device = {0};
-    device.cb = sizeof(device);
+    DISPLAY_DEVICEW device;
+    device.cb = sizeof(DISPLAY_DEVICEW);
 
     DXGI_ADAPTER_DESC description;
 
     adapter->lpVtbl->GetDesc(adapter, &description);
-    EnumDisplayDevices(NULL, 0, &device, EDD_GET_DEVICE_INTERFACE_NAME); // just get the first video adapter
-
-    gpu_data.device = device;
     gpu_data.description = description;
+
+    for (int i = 0; EnumDisplayDevicesW(NULL, i, &device, 0); i++) {
+        // check if the primary GPU
+        if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
+            gpu_data.device = device;
+            break;
+        }
+    }
 
     adapter->lpVtbl->Release(adapter);
     factory->lpVtbl->Release(factory);
