@@ -1,22 +1,22 @@
 #include "include/cpu_info.h"
 
-cpu_info_t get_cpu_info() {
-    cpu_info_t info;
+result_t* get_cpu_info() {
+    cpu_info_t* info = malloc(sizeof(cpu_info_t));
 
-    info.name = get_cpu_name();
-    strtrim(info.name);
+    info->name = strdup(get_cpu_name());
+    strtrim(info->name);
 
-    info.vendor = get_cpu_vendor();
-    strtrim(info.vendor);
+    info->vendor = strdup(get_cpu_vendor());
+    strtrim(info->vendor);
 
-    info.arch = get_cpu_arch();
-    strtrim(info.name);
+    info->arch = strdup(get_cpu_arch());
+    strtrim(info->name);
 
-    info.clock_speed = get_cpu_clock_speed();
-    info.core_count = get_cpu_core_count();
-    info.logical_processors_count = get_cpu_logical_processors_count();
+    info->clock_speed = get_cpu_clock_speed();
+    info->core_count = get_cpu_core_count();
+    info->logical_processors_count = get_cpu_logical_processors_count();
 
-    return info;
+    return result_success(info);
 }
 
 char* get_cpu_name() {

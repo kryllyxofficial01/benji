@@ -23,7 +23,7 @@ typedef struct BENJICPUINFO {
     // double current_temp; // TBD until i figure out how
 } cpu_info_t;
 
-cpu_info_t get_cpu_info();
+result_t* get_cpu_info();
 
 char* get_cpu_name();
 char* get_cpu_vendor();
