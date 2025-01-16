@@ -54,5 +54,8 @@ dkms.conf
 # VSCode config
 .vscode
 
-# Benji config
-config
+# Build directory
+build
+
+# Project Test Files
+tests
