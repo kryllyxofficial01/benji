@@ -23,7 +23,9 @@ double get_gpu_dedicated_video_memory();
 double get_gpu_dedicated_system_memory();
 double get_gpu_shared_system_memory();
 
-DXGI_ADAPTER_DESC get_gpu_description();
+#ifdef _WIN32
+    DXGI_ADAPTER_DESC get_gpu_description();
+#endif
 
 map_t* gpu_info_to_map(gpu_info_t gpu_info);
 

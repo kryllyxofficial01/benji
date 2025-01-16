@@ -16,7 +16,7 @@ gpu_info_t get_gpu_info() {
 }
 
 char* get_gpu_name() {
-    #ifdef _WIN32
+    #if defined(_WIN32)
         DISPLAY_DEVICEW device;
         device.cb = sizeof(DISPLAY_DEVICEW);
 
@@ -28,11 +28,13 @@ char* get_gpu_name() {
         }
 
         return NULL;
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 char* get_gpu_vendor() {
-    #ifdef _WIN32
+    #if defined(_WIN32)
         switch (get_gpu_description().VendorId) {
             case BENJI_GPU_VENDOR_INTEL: return "Intel";
             case BENJI_GPU_VENDOR_AMD: return "AMD";
@@ -40,77 +42,87 @@ char* get_gpu_vendor() {
 
             default: return "???";
         }
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 double get_gpu_dedicated_video_memory() {
-    #ifdef _WIN32
+    #if defined(_WIN32)
         return get_gpu_description().DedicatedVideoMemory / 1e9;
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 double get_gpu_dedicated_system_memory() {
-    #ifdef _WIN32
+    #if defined(_WIN32)
         return get_gpu_description().DedicatedSystemMemory / 1e9;
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 double get_gpu_shared_system_memory() {
-    #ifdef _WIN32
+    #if defined(_WIN32)
         return get_gpu_description().SharedSystemMemory / 1e9;
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
-DXGI_ADAPTER_DESC get_gpu_description() {
-    HRESULT result = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+#ifdef _WIN32
+    DXGI_ADAPTER_DESC get_gpu_description() {
+        HRESULT result = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-    if (FAILED(result)) {}
+        if (FAILED(result)) {}
 
-    IDXGIFactory* factory = NULL;
-    result = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
+        IDXGIFactory* factory = NULL;
+        result = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
 
-    if (FAILED(result)) {}
+        if (FAILED(result)) {}
 
-    IDXGIAdapter* primary_adapter = NULL;
-    DXGI_ADAPTER_DESC primary_adapter_description;
+        IDXGIAdapter* primary_adapter = NULL;
+        DXGI_ADAPTER_DESC primary_adapter_description;
 
-    IDXGIAdapter* adapter = NULL;
-    UINT index = 0;
-    while (factory->lpVtbl->EnumAdapters(factory, index, &adapter) != DXGI_ERROR_NOT_FOUND) {
-        IDXGIOutput* output = NULL;
+        IDXGIAdapter* adapter = NULL;
+        UINT index = 0;
+        while (factory->lpVtbl->EnumAdapters(factory, index, &adapter) != DXGI_ERROR_NOT_FOUND) {
+            IDXGIOutput* output = NULL;
 
-        if (adapter->lpVtbl->EnumOutputs(adapter, 0, &output) == S_OK) {
-            DXGI_OUTPUT_DESC output_description;
-            result = output->lpVtbl->GetDesc(output, &output_description);
+            if (adapter->lpVtbl->EnumOutputs(adapter, 0, &output) == S_OK) {
+                DXGI_OUTPUT_DESC output_description;
+                result = output->lpVtbl->GetDesc(output, &output_description);
 
-            if (SUCCEEDED(result) && output_description.AttachedToDesktop) {
-                primary_adapter = adapter;
-                primary_adapter->lpVtbl->AddRef(primary_adapter);
+                if (SUCCEEDED(result) && output_description.AttachedToDesktop) {
+                    primary_adapter = adapter;
+                    primary_adapter->lpVtbl->AddRef(primary_adapter);
+
+                    output->lpVtbl->Release(output);
+
+                    break;
+                }
 
                 output->lpVtbl->Release(output);
-
-                break;
             }
 
-            output->lpVtbl->Release(output);
+            adapter->lpVtbl->Release(adapter);
+
+            index++;
         }
 
-        adapter->lpVtbl->Release(adapter);
+        result = primary_adapter->lpVtbl->GetDesc(primary_adapter, &primary_adapter_description);
 
-        index++;
+        if (primary_adapter == NULL) {}
+
+        primary_adapter->lpVtbl->Release(primary_adapter);
+        factory->lpVtbl->Release(factory);
+
+        CoUninitialize();
+
+        return primary_adapter_description;
     }
-
-    result = primary_adapter->lpVtbl->GetDesc(primary_adapter, &primary_adapter_description);
-
-    if (primary_adapter == NULL) {}
-
-    primary_adapter->lpVtbl->Release(primary_adapter);
-    factory->lpVtbl->Release(factory);
-
-    CoUninitialize();
-
-    return primary_adapter_description;
-}
+#endif
 
 map_t* gpu_info_to_map(gpu_info_t gpu_info) {
     map_t* gpu_info_map = map_init();

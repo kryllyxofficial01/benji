@@ -32,45 +32,49 @@ char* get_cpu_name() {
         }
 
         return cpu_name;
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 char* get_cpu_vendor() {
-    int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
+    #if defined(_WIN32)
+        int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
 
-    char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-    cpu_vendor[0] = '\0';
+        char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+        cpu_vendor[0] = '\0';
 
-    __cpuid(cpu_info, 0);
+        __cpuid(cpu_info, 0);
 
-    *((int*) cpu_vendor) = cpu_info[1];
-    *((int*) (cpu_vendor + 4)) = cpu_info[3];
-    *((int*) (cpu_vendor + 8)) = cpu_info[2];
+        *((int*) cpu_vendor) = cpu_info[1];
+        *((int*) (cpu_vendor + 4)) = cpu_info[3];
+        *((int*) (cpu_vendor + 8)) = cpu_info[2];
 
-    cpu_vendor[strlen(cpu_vendor) - 2] = '\0';
+        cpu_vendor[strlen(cpu_vendor) - 2] = '\0';
 
-    return cpu_vendor;
+        return cpu_vendor;
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
+    #endif
 }
 
 char* get_cpu_arch() {
-    char* arch;
-
     #if defined(_WIN32)
         SYSTEM_INFO system_info;
 
         GetSystemInfo(&system_info);
 
         switch (system_info.wProcessorArchitecture) {
-            case PROCESSOR_ARCHITECTURE_AMD64: arch = "x64"; break;
-            case PROCESSOR_ARCHITECTURE_ARM: arch = "ARM"; break;
-            case PROCESSOR_ARCHITECTURE_ARM64: arch = "ARM64"; break;
-            case PROCESSOR_ARCHITECTURE_IA64: arch = "IA-64"; break;
-            case PROCESSOR_ARCHITECTURE_INTEL: arch = "x86"; break;
-            case PROCESSOR_ARCHITECTURE_UNKNOWN: arch = "???"; break;
+            case PROCESSOR_ARCHITECTURE_INTEL: return "x86";
+            case PROCESSOR_ARCHITECTURE_AMD64: return "x64";
+            case PROCESSOR_ARCHITECTURE_ARM: return "ARM";
+            case PROCESSOR_ARCHITECTURE_ARM64: return "ARM64";
+            case PROCESSOR_ARCHITECTURE_IA64: return "IA-64";
+            case PROCESSOR_ARCHITECTURE_UNKNOWN: return "??";
         }
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
-
-    return arch;
 }
 
 double get_cpu_clock_speed() {
@@ -98,18 +102,24 @@ double get_cpu_clock_speed() {
         else {
             return -1.0;
         }
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 int get_cpu_core_count() {
     #if defined(_WIN32)
        return get_cpu_processor_info(count_cpu_cores);
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
 int get_cpu_logical_processors_count() {
     #if defined(_WIN32)
         return get_cpu_processor_info(count_cpu_logical_processors);
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 }
 
