@@ -25,15 +25,15 @@ typedef struct BENJICPUINFO {
 
 result_t* get_cpu_info();
 
-char* get_cpu_name();
-char* get_cpu_vendor();
-char* get_cpu_arch();
-double get_cpu_clock_speed();
-int get_cpu_core_count();
-int get_cpu_logical_processors_count();
+result_t* get_cpu_name();
+result_t* get_cpu_vendor();
+result_t* get_cpu_arch();
+result_t* get_cpu_clock_speed();
+result_t* get_cpu_core_count();
+result_t* get_cpu_logical_processors_count();
 
 #ifdef _WIN32
-    int get_cpu_processor_info(processor_info_callback_t callback);
+    result_t* get_cpu_processor_info(processor_info_callback_t callback);
     DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
     DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
 #endif

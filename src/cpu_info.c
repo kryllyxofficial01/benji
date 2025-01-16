@@ -3,23 +3,23 @@
 result_t* get_cpu_info() {
     cpu_info_t* info = malloc(sizeof(cpu_info_t));
 
-    info->name = strdup(get_cpu_name());
+    info->name = strdup((char*) result_unwrap(get_cpu_name()));
     strtrim(info->name);
 
-    info->vendor = strdup(get_cpu_vendor());
+    info->vendor = strdup((char*) result_unwrap(get_cpu_vendor()));
     strtrim(info->vendor);
 
-    info->arch = strdup(get_cpu_arch());
+    info->arch = strdup((char*) result_unwrap(get_cpu_arch()));
     strtrim(info->name);
 
-    info->clock_speed = get_cpu_clock_speed();
-    info->core_count = get_cpu_core_count();
-    info->logical_processors_count = get_cpu_logical_processors_count();
+    info->clock_speed = *(double*) result_unwrap(get_cpu_clock_speed());
+    info->core_count = (size_t) (uintptr_t) result_unwrap(get_cpu_core_count());
+    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap(get_cpu_logical_processors_count());
 
     return result_success(info);
 }
 
-char* get_cpu_name() {
+result_t* get_cpu_name() {
     #if defined(_WIN32)
         int cpuid_info[BENJI_CPUID_BUFFER_LENGTH];
 
@@ -31,13 +31,13 @@ char* get_cpu_name() {
             memcpy(cpu_name + (i * 16), cpuid_info, sizeof(cpuid_info));
         }
 
-        return cpu_name;
+        return result_success(cpu_name);
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
 }
 
-char* get_cpu_vendor() {
+result_t* get_cpu_vendor() {
     #if defined(_WIN32)
         int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
 
@@ -52,32 +52,36 @@ char* get_cpu_vendor() {
 
         cpu_vendor[strlen(cpu_vendor) - 2] = '\0';
 
-        return cpu_vendor;
+        return result_success(cpu_vendor);
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
 }
 
-char* get_cpu_arch() {
+result_t* get_cpu_arch() {
     #if defined(_WIN32)
         SYSTEM_INFO system_info;
 
         GetSystemInfo(&system_info);
 
+        char* arch;
+
         switch (system_info.wProcessorArchitecture) {
-            case PROCESSOR_ARCHITECTURE_INTEL: return "x86";
-            case PROCESSOR_ARCHITECTURE_AMD64: return "x64";
-            case PROCESSOR_ARCHITECTURE_ARM: return "ARM";
-            case PROCESSOR_ARCHITECTURE_ARM64: return "ARM64";
-            case PROCESSOR_ARCHITECTURE_IA64: return "IA-64";
-            case PROCESSOR_ARCHITECTURE_UNKNOWN: return "??";
+            case PROCESSOR_ARCHITECTURE_INTEL: arch = "x86"; break;
+            case PROCESSOR_ARCHITECTURE_AMD64: arch = "x64"; break;
+            case PROCESSOR_ARCHITECTURE_ARM: arch = "ARM"; break;
+            case PROCESSOR_ARCHITECTURE_ARM64: arch = "ARM64"; break;
+            case PROCESSOR_ARCHITECTURE_IA64: arch = "IA-64"; break;
+            case PROCESSOR_ARCHITECTURE_UNKNOWN: arch = "??"; break;
         }
+
+        return result_success(arch);
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
 }
 
-double get_cpu_clock_speed() {
+result_t* get_cpu_clock_speed() {
     #if defined(_WIN32)
         HKEY hkey;
 
@@ -97,25 +101,32 @@ double get_cpu_clock_speed() {
 
             RegCloseKey(hkey);
 
-            return (result == BENJI_NO_ERROR && data_type == REG_DWORD) ? ((double) speed) / 1000 : -1.0;
+            if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {
+                double speed_ghz = speed / 1000.0;
+
+                return result_success((void*) &speed);
+            }
+            else {
+                return result_error(result, "RegQueryValueEx failed");
+            }
         }
         else {
-            return -1.0;
+            return result_error(result, "RegOpenKeyEx failed");
         }
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
 }
 
-int get_cpu_core_count() {
+result_t* get_cpu_core_count() {
     #if defined(_WIN32)
-       return get_cpu_processor_info(count_cpu_cores);
+        return get_cpu_processor_info(count_cpu_cores);
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
 }
 
-int get_cpu_logical_processors_count() {
+result_t* get_cpu_logical_processors_count() {
     #if defined(_WIN32)
         return get_cpu_processor_info(count_cpu_logical_processors);
     #elif defined(__linux__)
@@ -124,7 +135,7 @@ int get_cpu_logical_processors_count() {
 }
 
 #ifdef _WIN32
-    int get_cpu_processor_info(processor_info_callback_t callback) {
+    result_t* get_cpu_processor_info(processor_info_callback_t callback) {
         DWORD length = 0;
 
         GetLogicalProcessorInformation(NULL, &length);
@@ -132,13 +143,13 @@ int get_cpu_logical_processors_count() {
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
 
         if (!buffer) {
-            return -1;
+            return result_error(-1, "buffer is NULL");
         }
 
         if (!GetLogicalProcessorInformation(buffer, &length)) {
             free(buffer);
 
-            return -1;
+            return result_error(-1, "GetLogicalProcessorInformation failed");
         }
 
         DWORD result = 0;
@@ -152,7 +163,7 @@ int get_cpu_logical_processors_count() {
 
         free(buffer);
 
-        return result;
+        return result_success((void*) (uintptr_t) result);
     }
 
     DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
