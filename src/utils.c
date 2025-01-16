@@ -27,29 +27,37 @@ size_t splitstr(const char* string, char*** tokens, const char character) {
     }
     count++;
 
-    *tokens = (char**) malloc(BENJI_CAPACITY(count, char*));
+    if (string_length > 0 && string[string_length - 1] == character) {
+        count--;
+    }
+
+    *tokens = malloc(BENJI_CAPACITY(count, char*));
     if (*tokens == NULL) {
         return 0; // return 0 cause we havent processed any tokens yet
     }
 
     int index = 0, start = 0;
     for (int i = 0; i < string_length; i++) {
-        if (string[i] == character) {
-            int token_length = i - start;
+        if (string[i] == character || string[i] == '\0') {
+            if (start < i) {
+                int token_length = i - start;
 
-            (*tokens)[index] = (char*) malloc(BENJI_CAPACITY(token_length + 1, char));
+                (*tokens)[index] = malloc(BENJI_CAPACITY(token_length + 1, char));
 
-            if ((*tokens)[index] == NULL) {
-                return count; // return how ever many tokens we may have gotten
+                if ((*tokens)[index] == NULL) {
+                    free((*tokens)[index]); // look at me, being responsible
+
+                    return count; // return how ever many tokens we managed to get
+                }
+
+                strncpy((*tokens)[index], string + start, token_length);
+
+                (*tokens)[index][token_length] = '\0';
+
+                index++;
             }
 
-            strncpy((*tokens)[index], string + start, token_length);
-
-            (*tokens)[index][token_length] = '\0';
-
             start = i + 1;
-
-            index++;
         }
     }
 

@@ -1,7 +1,7 @@
 GXX = gcc
 
 GXX_FLAGS = -g
-LINKED_LIBS = -lWs2_32 -ldxgi -ldxguid
+LINKED_LIBS = -lWs2_32 -ldxgi -ldxguid -lole32
 
 BUILD = build
 OBJ = $(BUILD)/obj

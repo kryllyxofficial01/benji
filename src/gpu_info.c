@@ -7,7 +7,6 @@ gpu_info_t get_gpu_info() {
     strtrim(info.name);
 
     info.vendor = get_gpu_vendor();
-    strtrim(info.vendor);
 
     info.dedicated_video_memory = get_gpu_dedicated_video_memory();
     info.dedicated_system_memory = get_gpu_dedicated_system_memory();
@@ -34,7 +33,7 @@ char* get_gpu_name() {
 
 char* get_gpu_vendor() {
     #ifdef _WIN32
-        switch (get_gpu_data().description.VendorId) {
+        switch (get_gpu_description().VendorId) {
             case BENJI_GPU_VENDOR_INTEL: return "Intel";
             case BENJI_GPU_VENDOR_AMD: return "AMD";
             case BENJI_GPU_VENDOR_NVIDIA: return "NVIDIA";
@@ -46,55 +45,71 @@ char* get_gpu_vendor() {
 
 double get_gpu_dedicated_video_memory() {
     #ifdef _WIN32
-        return (get_gpu_data().description.DedicatedVideoMemory / (1024 * 1024)) / 1000;
+        return get_gpu_description().DedicatedVideoMemory / 1e9;
     #endif
 }
 
 double get_gpu_dedicated_system_memory() {
     #ifdef _WIN32
-        return (get_gpu_data().description.DedicatedSystemMemory/ (1024 * 1024)) / 1000;
+        return get_gpu_description().DedicatedSystemMemory / 1e9;
     #endif
 }
 
 double get_gpu_shared_system_memory() {
     #ifdef _WIN32
-        return (get_gpu_data().description.SharedSystemMemory / (1024 * 1024)) / 1000;
+        return get_gpu_description().SharedSystemMemory / 1e9;
     #endif
 }
 
-struct BENJIGPUDATA get_gpu_data() {
-    struct BENJIGPUDATA gpu_data;
+DXGI_ADAPTER_DESC get_gpu_description() {
+    HRESULT result = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+
+    if (FAILED(result)) {}
 
     IDXGIFactory* factory = NULL;
+    result = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
 
-    HRESULT result = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
+    if (FAILED(result)) {}
 
-    if (FAILED(result)) {
-        // todo: error handling
-    }
+    IDXGIAdapter* primary_adapter = NULL;
+    DXGI_ADAPTER_DESC primary_adapter_description;
 
     IDXGIAdapter* adapter = NULL;
+    UINT index = 0;
+    while (factory->lpVtbl->EnumAdapters(factory, index, &adapter) != DXGI_ERROR_NOT_FOUND) {
+        IDXGIOutput* output = NULL;
 
-    DISPLAY_DEVICEW device;
-    device.cb = sizeof(DISPLAY_DEVICEW);
+        if (adapter->lpVtbl->EnumOutputs(adapter, 0, &output) == S_OK) {
+            DXGI_OUTPUT_DESC output_description;
+            result = output->lpVtbl->GetDesc(output, &output_description);
 
-    DXGI_ADAPTER_DESC description;
+            if (SUCCEEDED(result) && output_description.AttachedToDesktop) {
+                primary_adapter = adapter;
+                primary_adapter->lpVtbl->AddRef(primary_adapter);
 
-    adapter->lpVtbl->GetDesc(adapter, &description);
-    gpu_data.description = description;
+                output->lpVtbl->Release(output);
 
-    for (int i = 0; EnumDisplayDevicesW(NULL, i, &device, 0); i++) {
-        // check if the primary GPU
-        if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
-            gpu_data.device = device;
-            break;
+                break;
+            }
+
+            output->lpVtbl->Release(output);
         }
+
+        adapter->lpVtbl->Release(adapter);
+
+        index++;
     }
 
-    adapter->lpVtbl->Release(adapter);
+    result = primary_adapter->lpVtbl->GetDesc(primary_adapter, &primary_adapter_description);
+
+    if (primary_adapter == NULL) {}
+
+    primary_adapter->lpVtbl->Release(primary_adapter);
     factory->lpVtbl->Release(factory);
 
-    return gpu_data;
+    CoUninitialize();
+
+    return primary_adapter_description;
 }
 
 map_t* gpu_info_to_map(gpu_info_t gpu_info) {
