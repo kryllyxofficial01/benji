@@ -102,9 +102,11 @@ result_t* get_cpu_clock_speed() {
             RegCloseKey(hkey);
 
             if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {
-                double speed_ghz = speed / 1000.0;
+                void* speed_ghz = malloc(sizeof(double));
 
-                return result_success((void*) &speed);
+                *(double*) speed_ghz = speed / 1000.0;
+
+                return result_success(speed_ghz);
             }
             else {
                 return result_error(result, "RegQueryValueEx failed");
