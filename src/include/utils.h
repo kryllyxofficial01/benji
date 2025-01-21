@@ -7,6 +7,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "result.h"
+
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */
 
@@ -60,8 +62,6 @@
     #if defined(_WIN32)
         #include <dxgi.h>
 
-        #pragma comment(lib, "dxgi.lib")
-
         #define BENJI_CPUID_BUFFER_LENGTH 4
         #define BENJI_CPUID_CPU_NAME_SECTIONS_COUNT 3
         #define BENJI_CPUID_CPU_NAME_START 0x80000002
@@ -71,6 +71,8 @@
         #define BENJI_GPU_VENDOR_NVIDIA 0x10de
 
         typedef DWORD (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
+    #elif defined(__linux__)
+        /* TODO: add linux stuff */
     #endif
 #endif
 

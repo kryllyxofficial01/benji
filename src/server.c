@@ -58,14 +58,14 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
             char* header;
 
             if (strcmp(data_groups[i], "cpu_all") == 0) {
-                cpu_info_t cpu_info = get_cpu_info();
-                map_data = cpu_info_to_map(cpu_info);
+                cpu_info_t* cpu_info = (cpu_info_t*) result_unwrap(get_cpu_info());
+                map_data = cpu_info_to_map(*cpu_info);
 
                 header = "cpu_info";
             }
             else if (strcmp(data_groups[i], "gpu_all") == 0) {
-                gpu_info_t gpu_info = get_gpu_info();
-                map_data = gpu_info_to_map(gpu_info);
+                gpu_info_t* gpu_info = (gpu_info_t*) result_unwrap(get_gpu_info());
+                map_data = gpu_info_to_map(*gpu_info);
 
                 header = "gpu_info";
             }

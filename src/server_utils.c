@@ -2,7 +2,7 @@
 
 #include "include/utils.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
     BENJI_SC_ABI void winsock_init() {
         struct WSAData wsa_data;
 
@@ -32,7 +32,7 @@ BENJI_SC_ABI BENJI_SOCKET create_socket() {
     if (sock == BENJI_SOCKET_ERROR) {
         printf("Failed to close socket\n");
 
-        #if defined(_WIN32)
+        #ifdef _WIN32
             winsock_cleanup();
         #endif
 
@@ -54,7 +54,7 @@ BENJI_SC_ABI void close_socket(BENJI_SOCKET sock) {
     if (return_code == BENJI_SOCKET_ERROR) {
         printf("Failed to close socket\n");
 
-        #if defined(_WIN32)
+        #ifdef _WIN32
             winsock_cleanup();
         #endif
 
@@ -63,7 +63,7 @@ BENJI_SC_ABI void close_socket(BENJI_SOCKET sock) {
 }
 
 BENJI_SC_ABI void terminate(const size_t exit_code) {
-    #if defined(_WIN32)
+    #ifdef _WIN32
         winsock_cleanup();
     #endif
 
