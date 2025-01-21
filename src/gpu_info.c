@@ -109,7 +109,7 @@ result_t* get_gpu_shared_system_memory() {
         }
 
         IDXGIAdapter* primary_adapter = NULL;
-        DXGI_ADAPTER_DESC primary_adapter_description;
+        DXGI_ADAPTER_DESC* primary_adapter_description = malloc(sizeof(DXGI_ADAPTER_DESC));
 
         IDXGIAdapter* adapter = NULL;
         UINT index = 0;
@@ -137,7 +137,7 @@ result_t* get_gpu_shared_system_memory() {
             index++;
         }
 
-        result = primary_adapter->lpVtbl->GetDesc(primary_adapter, &primary_adapter_description);
+        result = primary_adapter->lpVtbl->GetDesc(primary_adapter, primary_adapter_description);
 
         if (primary_adapter == NULL) {
             return result_error(result, "GetDesc failed");
@@ -148,7 +148,7 @@ result_t* get_gpu_shared_system_memory() {
 
         CoUninitialize();
 
-        return result_success(&primary_adapter_description);
+        return result_success((void*) primary_adapter_description);
     }
 #endif
 
