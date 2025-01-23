@@ -20,11 +20,19 @@ BENJI_SC_ABI result_t* server_init() {
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == BENJI_SOCKET_ERROR) {
         printf("Failed to bind to server address\n");
 
-        terminate(EXIT_FAILURE);
+        close_socket(server_socket);
+
+        return result_error(WSAGetLastError(), "bind() failed");
+
+        // terminate(EXIT_FAILURE);
     }
 
     if (listen(server_socket, BENJI_MAX_SOCK_CONNS) == BENJI_SOCKET_ERROR) {
         printf("Failed to put into listening mode\n");
+
+        close_socket(server_socket);
+
+        return result_error(WSAGetLastError(), "listen() failed");
 
         terminate(EXIT_FAILURE);
     }
@@ -138,6 +146,9 @@ BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
                 else {
                     break;
                 }
+            }
+            else {
+                return result_error(WSAGetLastError(), "recv() failed");
             }
         }
 
