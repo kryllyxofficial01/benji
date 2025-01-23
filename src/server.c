@@ -38,17 +38,17 @@ BENJI_SC_ABI result_t* server_init() {
 
     server_status = BENJI_SERVER_RUNNING;
 
-    return make_socket_result(server_socket);
+    return result_success((void*) (uintptr_t) server_socket);
 }
 
 BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
     while (server_status == BENJI_SERVER_RUNNING) {
-        BENJI_SOCKET client_socket = unwrap_socket_result(server_accept_client(server_socket));
+        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_accept_client(server_socket));
 
         char* data = (char*) result_unwrap(server_receive_from_client(client_socket));
         char** data_groups;
 
-        size_t data_group_count = server_parse_client_data(data, &data_groups);
+        size_t data_group_count = (size_t) (uintptr_t) result_unwrap(server_parse_client_data(data, &data_groups));
 
         char* json = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
         json[0] = '\0';
@@ -105,13 +105,13 @@ BENJI_SC_ABI result_t* server_accept_client(BENJI_SOCKET server_socket) {
     BENJI_SOCKET client_socket = accept(server_socket, (struct sockaddr*) &client, &client_length);
 
     if (client_socket == BENJI_INVALID_SOCKET) {
-        return 0;
+        return result_error(WSAGetLastError(), "accept() failed");
     }
 
     u_long non_blocking_mode = true;
     ioctlsocket(client_socket, FIONBIO, &non_blocking_mode);
 
-    return make_socket_result(client_socket);
+    return result_success((void*) (uintptr_t) client_socket);
 }
 
 BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
@@ -165,9 +165,9 @@ BENJI_SC_ABI result_t* server_send_to_client(BENJI_SOCKET client_socket, const c
         return result_error(WSAGetLastError(), "send() failed");
     }
 
-    return make_int_result(bytes_sent);
+    return result_success((void*) (uintptr_t) bytes_sent);
 }
 
 result_t* server_parse_client_data(const char* client_data, char*** data_groups) {
-    return splitstr(client_data, data_groups, ';');
+    return result_success((void*) (uintptr_t) splitstr(client_data, data_groups, ';'));
 }

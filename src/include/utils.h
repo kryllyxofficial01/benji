@@ -55,9 +55,6 @@
     BENJI_SC_ABI BENJI_SOCKET create_socket();
     BENJI_SC_ABI void close_socket(BENJI_SOCKET sock);
 
-    result_t* make_socket_result(BENJI_SOCKET sock);
-    BENJI_SOCKET unwrap_socket_result(result_t* result);
-
     BENJI_SC_ABI void terminate(const int exit_code);
 #endif
 
@@ -93,9 +90,6 @@ void strtrim(char* string);
 size_t splitstr(const char* string, char*** tokens, const char character); // returns token count
 
 char* wcharp_to_charp(const WCHAR* wchar);
-
-result_t* make_int_result(int value);
-int unwrap_int_result(result_t* result);
 
 void write_to_file(const char* filepath, const char* data);
 

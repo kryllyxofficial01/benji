@@ -90,10 +90,6 @@ result_t* make_int_result(int value) {
     return result_success((void*) (uintptr_t) value);
 }
 
-int unwrap_int_result(result_t* result) {
-    return (int) (uintptr_t) result_unwrap(result);
-}
-
 void write_to_file(const char* filepath, const char* data) {
     FILE* file = fopen(filepath, "w");
 
