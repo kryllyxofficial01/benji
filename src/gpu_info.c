@@ -99,13 +99,15 @@ result_t* get_gpu_shared_system_memory() {
     result_t* get_gpu_description() {
         HRESULT result = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-        if (FAILED(result)) {}
+        if (FAILED(result)) {
+            return result_error(result, "CoInitializeEx() failed");
+        }
 
         IDXGIFactory* factory = NULL;
         result = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
 
         if (FAILED(result)) {
-            return result_error(result, "CreateDXGIFactory failed");
+            return result_error(result, "CreateDXGIFactory() failed");
         }
 
         IDXGIAdapter* primary_adapter = NULL;
@@ -116,7 +118,7 @@ result_t* get_gpu_shared_system_memory() {
         while (factory->lpVtbl->EnumAdapters(factory, index, &adapter) != DXGI_ERROR_NOT_FOUND) {
             IDXGIOutput* output = NULL;
 
-            if (adapter->lpVtbl->EnumOutputs(adapter, 0, &output) == S_OK) {
+            if ((result = adapter->lpVtbl->EnumOutputs(adapter, 0, &output)) == S_OK) {
                 DXGI_OUTPUT_DESC output_description;
                 result = output->lpVtbl->GetDesc(output, &output_description);
 
@@ -128,8 +130,14 @@ result_t* get_gpu_shared_system_memory() {
 
                     break;
                 }
+                else {
+                    return result_error(result, "GetDesc() failed");
+                }
 
                 output->lpVtbl->Release(output);
+            }
+            else {
+                return result_error(result, "EnumOutputs() failed");
             }
 
             adapter->lpVtbl->Release(adapter);
@@ -140,7 +148,7 @@ result_t* get_gpu_shared_system_memory() {
         result = primary_adapter->lpVtbl->GetDesc(primary_adapter, primary_adapter_description);
 
         if (primary_adapter == NULL) {
-            return result_error(result, "GetDesc failed");
+            return result_error(result, "GetDesc() failed");
         }
 
         primary_adapter->lpVtbl->Release(primary_adapter);

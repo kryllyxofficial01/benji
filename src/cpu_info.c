@@ -109,11 +109,11 @@ result_t* get_cpu_clock_speed() {
                 return result_success(speed_ghz);
             }
             else {
-                return result_error(result, "RegQueryValueEx failed");
+                return result_error(result, "RegQueryValueEx() failed");
             }
         }
         else {
-            return result_error(result, "RegOpenKeyEx failed");
+            return result_error(result, "RegOpenKeyEx() failed");
         }
     #elif defined(__linux__)
         /* TODO: add linux stuff */
@@ -151,7 +151,7 @@ result_t* get_cpu_logical_processors_count() {
         if (!GetLogicalProcessorInformation(buffer, &length)) {
             free(buffer);
 
-            return result_error(-1, "GetLogicalProcessorInformation failed");
+            return result_error(-1, "GetLogicalProcessorInformation() failed");
         }
 
         DWORD result = 0;

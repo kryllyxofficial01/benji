@@ -12,4 +12,8 @@ int main(int argc, const char* argv[]) {
     server_run(server_socket);
 
     close_socket(server_socket);
+
+    winsock_cleanup();
+
+    return EXIT_SUCCESS;
 }
