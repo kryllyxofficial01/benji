@@ -1,6 +1,6 @@
 #include "include/server.h"
 
-BENJI_SC_ABI BENJI_SOCKET server_init() {
+BENJI_SC_ABI result_t* server_init() {
     struct sockaddr_in server_address;
 
     server_address.sin_family = AF_INET; // ipv4 address family
@@ -38,14 +38,14 @@ BENJI_SC_ABI BENJI_SOCKET server_init() {
 
     server_status = BENJI_SERVER_RUNNING;
 
-    return server_socket;
+    return make_socket_result(server_socket);
 }
 
 BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
     while (server_status == BENJI_SERVER_RUNNING) {
-        BENJI_SOCKET client_socket = server_accept_client(server_socket);
+        BENJI_SOCKET client_socket = unwrap_socket_result(server_accept_client(server_socket));
 
-        char* data = server_receive_from_client(client_socket);
+        char* data = (char*) result_unwrap(server_receive_from_client(client_socket));
         char** data_groups;
 
         size_t data_group_count = server_parse_client_data(data, &data_groups);
@@ -97,7 +97,7 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
     }
 }
 
-BENJI_SC_ABI BENJI_SOCKET server_accept_client(BENJI_SOCKET server_socket) {
+BENJI_SC_ABI result_t* server_accept_client(BENJI_SOCKET server_socket) {
     struct sockaddr_storage client;
 
     socklen_t client_length = sizeof(client);
@@ -111,10 +111,10 @@ BENJI_SC_ABI BENJI_SOCKET server_accept_client(BENJI_SOCKET server_socket) {
     u_long non_blocking_mode = true;
     ioctlsocket(client_socket, FIONBIO, &non_blocking_mode);
 
-    return client_socket;
+    return make_socket_result(client_socket);
 }
 
-BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
+BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
     char* data = NULL;
     size_t data_size = 0;
 
@@ -147,7 +147,7 @@ BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
         if (data == NULL) {
             free(data);
 
-            return "";
+            return result_error(-1, "realloc() failed");
         }
 
         memcpy(data + data_size, buffer, bytes_received + 1);
@@ -155,13 +155,19 @@ BENJI_SC_ABI char* server_receive_from_client(BENJI_SOCKET client_socket) {
         data_size += bytes_received;
     } while (bytes_received > 0);
 
-    return data;
+    return result_success(data);
 }
 
-BENJI_SC_ABI int server_send_to_client(BENJI_SOCKET client_socket, const char* data) {
-    return send(client_socket, data, strlen(data) + 1, 0);
+BENJI_SC_ABI result_t* server_send_to_client(BENJI_SOCKET client_socket, const char* data) {
+    int bytes_sent = send(client_socket, data, strlen(data) + 1, 0);
+
+    if (bytes_sent == BENJI_SOCKET_ERROR) {
+        return result_error(WSAGetLastError(), "send() failed");
+    }
+
+    return make_int_result(bytes_sent);
 }
 
-size_t server_parse_client_data(const char* client_data, char*** data_groups) {
+result_t* server_parse_client_data(const char* client_data, char*** data_groups) {
     return splitstr(client_data, data_groups, ';');
 }

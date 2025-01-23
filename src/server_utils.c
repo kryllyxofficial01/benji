@@ -62,7 +62,16 @@ BENJI_SC_ABI void close_socket(BENJI_SOCKET sock) {
     }
 }
 
-BENJI_SC_ABI void terminate(const size_t exit_code) {
+BENJI_SOCKET unwrap_socket_result(result_t* result) {
+    return (BENJI_SOCKET) (uintptr_t) result_unwrap(result);
+}
+
+result_t* make_socket_result(BENJI_SOCKET sock) {
+    // assume that this is only being used in a context with no errors
+    return result_success((void*) (uintptr_t) sock);
+}
+
+BENJI_SC_ABI void terminate(const int exit_code) {
     #ifdef _WIN32
         winsock_cleanup();
     #endif
