@@ -86,6 +86,10 @@ char* wcharp_to_charp(const WCHAR* wchar) {
     return string;
 }
 
+result_t* make_int_result(int value) {
+    return result_success((void*) (uintptr_t) value);
+}
+
 void write_to_file(const char* filepath, const char* data) {
     FILE* file = fopen(filepath, "w");
 

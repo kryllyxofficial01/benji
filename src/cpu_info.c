@@ -50,7 +50,7 @@ result_t* get_cpu_vendor() {
         *((int*) (cpu_vendor + 4)) = cpu_info[3];
         *((int*) (cpu_vendor + 8)) = cpu_info[2];
 
-        cpu_vendor[strlen(cpu_vendor) - 2] = '\0';
+        cpu_vendor[strlen(cpu_vendor) - 2] = '\0'; // this is kinda cursed, but it works sooooo
 
         return result_success(cpu_vendor);
     #elif defined(__linux__)
@@ -72,7 +72,9 @@ result_t* get_cpu_arch() {
             case PROCESSOR_ARCHITECTURE_ARM: arch = "ARM"; break;
             case PROCESSOR_ARCHITECTURE_ARM64: arch = "ARM64"; break;
             case PROCESSOR_ARCHITECTURE_IA64: arch = "IA-64"; break;
-            case PROCESSOR_ARCHITECTURE_UNKNOWN: arch = "??"; break;
+
+            case PROCESSOR_ARCHITECTURE_UNKNOWN: // make this one fall through because i dont wanna deal with edge cases
+            default: arch = "??"; break;
         }
 
         return result_success(arch);
@@ -109,11 +111,11 @@ result_t* get_cpu_clock_speed() {
                 return result_success(speed_ghz);
             }
             else {
-                return result_error(result, "RegQueryValueEx failed");
+                return result_error(result, "RegQueryValueEx() failed");
             }
         }
         else {
-            return result_error(result, "RegOpenKeyEx failed");
+            return result_error(result, "RegOpenKeyEx() failed");
         }
     #elif defined(__linux__)
         /* TODO: add linux stuff */
@@ -151,7 +153,7 @@ result_t* get_cpu_logical_processors_count() {
         if (!GetLogicalProcessorInformation(buffer, &length)) {
             free(buffer);
 
-            return result_error(-1, "GetLogicalProcessorInformation failed");
+            return result_error(-1, "GetLogicalProcessorInformation() failed");
         }
 
         DWORD result = 0;

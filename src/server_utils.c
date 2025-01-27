@@ -11,7 +11,7 @@
         if (WSAStartup(WINSOCK_VERSION, &wsa_data) != BENJI_NO_ERROR) {
             printf("Failed to initialize Winsock2");
 
-            exit(EXIT_FAILURE);
+            terminate(WSAGetLastError()); // idk about this, but ehhhhhhhhhhhh
         }
 
         printf("Success\n\n");
@@ -21,7 +21,7 @@
         if (WSACleanup() == BENJI_SOCKET_ERROR) {
             printf("Failed to cleanup Winsock2\n");
 
-            exit(EXIT_FAILURE);
+            terminate(WSAGetLastError());
         }
     }
 #endif
@@ -32,11 +32,7 @@ BENJI_SC_ABI BENJI_SOCKET create_socket() {
     if (sock == BENJI_SOCKET_ERROR) {
         printf("Failed to close socket\n");
 
-        #ifdef _WIN32
-            winsock_cleanup();
-        #endif
-
-        exit(EXIT_FAILURE);
+        terminate(WSAGetLastError());
     }
 
     return sock;
@@ -54,18 +50,14 @@ BENJI_SC_ABI void close_socket(BENJI_SOCKET sock) {
     if (return_code == BENJI_SOCKET_ERROR) {
         printf("Failed to close socket\n");
 
-        #ifdef _WIN32
-            winsock_cleanup();
-        #endif
-
-        exit(EXIT_FAILURE);
+        terminate(WSAGetLastError());
     }
 }
 
-BENJI_SC_ABI void terminate(const size_t exit_code) {
+BENJI_SC_ABI void terminate(const int exit_code) {
     #ifdef _WIN32
         winsock_cleanup();
     #endif
 
-    exit(EXIT_FAILURE);
+    exit(exit_code);
 }

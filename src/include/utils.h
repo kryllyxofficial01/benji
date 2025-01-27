@@ -55,7 +55,7 @@
     BENJI_SC_ABI BENJI_SOCKET create_socket();
     BENJI_SC_ABI void close_socket(BENJI_SOCKET sock);
 
-    BENJI_SC_ABI void terminate(const size_t exit_code);
+    BENJI_SC_ABI void terminate(const int exit_code);
 #endif
 
 #ifdef BENJI_USE_SYS_INFO_UTILS
