@@ -10,7 +10,7 @@ EXEC = benji
 SRC = $(wildcard src/*.c)
 OBJS = $(subst src/, $(OBJ)/, $(addsuffix .o, $(basename $(SRC))))
 
-all: mkbuild compile
+all: clean compile
 
 compile: $(BUILD)/$(EXEC)
 
@@ -26,14 +26,14 @@ $(OBJ)/%.o: src/%.c
 
 .PHONY: clean
 .SILENT: clean
-clean:
+clean: mkbuild
 ifeq ($(OS), Windows_NT)
 	del /Q /S $(BUILD)\*
 else ifeq ($(shell uname), Linux)
 	rm -rf $(BUILD)/*
 endif
 
-mkbuild: clean
+mkbuild:
 ifeq ($(OS), Windows_NT)
 	if not exist "$(BUILD)" mkdir "$(BUILD)"
 	if not exist "$(OBJ)" mkdir "$(OBJ)"

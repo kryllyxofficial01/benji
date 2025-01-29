@@ -5,6 +5,8 @@
 
 #include "cpu_info.h"
 #include "gpu_info.h"
+#include "ram_info.h"
+
 #include "utils.h"
 
 BENJI_SC_ABI result_t* server_init();
