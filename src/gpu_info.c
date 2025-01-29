@@ -59,7 +59,7 @@ result_t* get_gpu_dedicated_video_memory() {
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = description->DedicatedVideoMemory / 1e9;
+        *(double*) memory = description->DedicatedVideoMemory / (1024.0 * 1024.0 * 1024.0);
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -73,7 +73,7 @@ result_t* get_gpu_dedicated_system_memory() {
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = description->DedicatedSystemMemory / 1e9;
+        *(double*) memory = description->DedicatedSystemMemory / (1024.0 * 1024.0 * 1024.0);
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -87,7 +87,7 @@ result_t* get_gpu_shared_system_memory() {
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = description->SharedSystemMemory / 1e9;
+        *(double*) memory = description->SharedSystemMemory / (1024.0 * 1024.0 * 1024.0);
 
         return result_success(memory);
     #elif defined(__linux__)
