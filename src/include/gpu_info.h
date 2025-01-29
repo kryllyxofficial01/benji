@@ -10,9 +10,9 @@
 typedef struct BENJIGPUINFO {
     char* name;
     char* vendor;
-    double dedicated_video_memory;
-    double dedicated_system_memory;
-    double shared_system_memory;
+    double dedicated_video_memory; // in GB
+    double dedicated_system_memory; // in GB
+    double shared_system_memory; // in GB
 } gpu_info_t;
 
 result_t* get_gpu_info();

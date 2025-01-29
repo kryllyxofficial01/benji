@@ -77,6 +77,12 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
 
                 header = "gpu_info";
             }
+            else if (strcmp(data_groups[i], "ram_all") == 0) {
+                ram_info_t* ram_info = (ram_info_t*) result_unwrap(get_ram_info());
+                map_data = ram_info_to_map(*ram_info);
+
+                header = "ram_info";
+            }
 
             char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
             json_block[0] = '\0';
