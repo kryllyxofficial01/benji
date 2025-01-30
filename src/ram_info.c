@@ -6,6 +6,7 @@ result_t* get_ram_info() {
     info->total_memory = *(double*) result_unwrap(get_ram_total_memory());
     info->memory_load = *(double*) result_unwrap(get_ram_memory_load());
     info->free_memory = *(double*) result_unwrap(get_ram_free_memory());
+    info->speed = (WORD) (uintptr_t) result_unwrap(get_ram_speed());
 
     return result_success(info);
 }
@@ -55,6 +56,51 @@ result_t* get_ram_free_memory() {
     #endif
 }
 
+result_t* get_ram_speed() {
+    #if defined(_WIN32)
+        DWORD size = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
+
+        if (size == 0) {
+            return result_error(-1, "GetSystemFirmwareTable() failed");
+        }
+
+        RAW_SMBIOS_DATA* buffer = (RAW_SMBIOS_DATA*) malloc(size);
+
+        if (!GetSystemFirmwareTable('RSMB', 0, buffer, size)) {
+            free(buffer);
+
+            return result_error(-1, "GetSystemFirmwareTable() failed");
+        }
+
+        BYTE* data = buffer->data;
+        BYTE* end = data + buffer->length;
+
+        while (data < end) {
+            SMBIOS_MEMORY_DEVICE* memory = (SMBIOS_MEMORY_DEVICE*) data;
+
+            if (memory->type == BENJI_SMBIOS_MEMORY_DEVICE_TYPE) {
+                free(buffer);
+
+                WORD speed = *(WORD*) (data + BENJI_SMBIOS_SPEED_OFFSET);
+
+                return result_success((void*) (uintptr_t) speed);
+            }
+
+            data += memory->length;
+
+            while (*data != 0 || *(data + 1) != 0) {
+                data++;
+            }
+
+            data += 2;
+        }
+
+        free(buffer);
+
+        return result_error(-1, "could not collect memory speed");
+    #endif
+}
+
 #ifdef _WIN32
     result_t* get_memory_status() {
         MEMORYSTATUSEX* status = malloc(sizeof(MEMORYSTATUSEX));
@@ -86,6 +132,9 @@ map_t* ram_info_to_map(ram_info_t ram_info) {
 
     sprintf(buffer, "%0.3f", ram_info.free_memory);
     map_insert(ram_info_map, "ram_free_memory", buffer);
+
+    sprintf(buffer, "%i", ram_info.speed);
+    map_insert(ram_info_map, "ram_speed", buffer);
 
     free(buffer);
 

@@ -70,6 +70,9 @@
         #define BENJI_GPU_VENDOR_AMD 0x1002
         #define BENJI_GPU_VENDOR_NVIDIA 0x10de
 
+        #define BENJI_SMBIOS_MEMORY_DEVICE_TYPE 17
+        #define BENJI_SMBIOS_SPEED_OFFSET 0x15
+
         typedef DWORD (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
     #elif defined(__linux__)
         /* TODO: add linux stuff */
