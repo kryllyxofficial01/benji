@@ -7,7 +7,7 @@
 
 #include "map.h"
 
-typedef struct BENJIGPUINFO {
+typedef struct _BENJI_GPU_INFO {
     char* name;
     char* vendor;
     double dedicated_video_memory; // in GB

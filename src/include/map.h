@@ -7,7 +7,7 @@
 
 #define BENJI_MAP_KEY_NOT_FOUND -1
 
-typedef struct BENJIMAP {
+typedef struct _BENJI_MAP {
     char** keys;
     char** values;
 

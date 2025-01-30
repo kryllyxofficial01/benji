@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct BENJIRESULT {
+typedef struct _BENJI_RESULT {
     bool is_error;
 
-    union _PAYLOAD {
+    union _RESULT_PAYLOAD {
         void* value;
 
-        struct _ERROR {
+        struct _RESULT_PAYLOAD_ERROR {
             int code;
             const char* error_message;
         } error;

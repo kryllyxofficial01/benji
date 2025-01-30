@@ -8,12 +8,11 @@
 #include "map.h"
 
 #if defined(_WIN32)
-    #include <windows.h>
     #include <intrin.h>
     #include <unistd.h>
 #endif
 
-typedef struct BENJICPUINFO {
+typedef struct _BENJI_CPU_INFO {
     char* name;
     char* vendor;
     char* arch;
