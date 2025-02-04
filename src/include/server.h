@@ -3,8 +3,6 @@
 
 #define BENJI_USE_SERVER_UTILS
 
-#include <sys/socket.h>
-
 #include "cpu_info.h"
 #include "gpu_info.h"
 #include "ram_info.h"
