@@ -11,33 +11,33 @@ typedef struct _BENJI_RAM_INFO {
     double total_memory; // in GB
     double memory_load; // in GB
     double free_memory; // in GB
-    WORD speed; // in MHz
+    uint16_t speed; // in MHz
 } ram_info_t;
 
 #ifdef _WIN32
     #pragma pack(push, 1)
         typedef struct _SMBIOS_MEMORY_DEVICE {
-            BYTE type;
-            BYTE length;
-            WORD handle;
+            uint8_t type;
+            uint8_t length;
+            uint16_t handle;
 
-            WORD physical_memory_array_handle;
-            WORD memory_error_information_handle;
+            uint16_t physical_memory_array_handle;
+            uint16_t memory_error_information_handle;
 
-            WORD total_width;
-            WORD data_width;
-            WORD size;
+            uint16_t total_width;
+            uint16_t data_width;
+            uint16_t size;
 
-            BYTE form_factor;
-            BYTE device_set;
+            uint8_t form_factor;
+            uint8_t device_set;
 
-            CHAR device_locator[1];
+            char device_locator[1];
         } SMBIOS_MEMORY_DEVICE;
 
         typedef struct _RAW_SMBIOS_DATA {
-            DWORD signature;
-            DWORD length;
-            BYTE data[1];
+            uint32_t signature;
+            uint32_t length;
+            uint8_t data[1];
         } RAW_SMBIOS_DATA;
     #pragma pack(pop)
 #endif

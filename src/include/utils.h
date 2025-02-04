@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
@@ -37,6 +38,8 @@
         #include <sys/socket.h>
         #include <arpa/inet.h>
         #include <unistd.h>
+        #include <fcntl.h>
+        #include <errno.h>
 
         typedef unsigned long long BENJI_SOCKET;
 
@@ -73,7 +76,7 @@
         #define BENJI_SMBIOS_MEMORY_DEVICE_TYPE 17
         #define BENJI_SMBIOS_SPEED_OFFSET 0x15
 
-        typedef DWORD (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
+        typedef uint32_t (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
@@ -82,6 +85,12 @@
 #define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
 
 #define BENJI_CAPACITY(n, t) ((n) * sizeof(t))
+
+#if defined(_WIN32)
+    #define SLEEP(ms) Sleep(ms)
+#elif defined(__linux__)
+    #define SLEEP(ms) sleep(ms)
+#endif
 
 #ifdef NOERROR
     #define BENJI_NO_ERROR NOERROR
@@ -92,7 +101,9 @@
 void strtrim(char* string);
 size_t splitstr(const char* string, char*** tokens, const char character); // returns token count
 
-char* wcharp_to_charp(const WCHAR* wchar);
+#ifdef _WIN32
+    char* wcharp_to_charp(const WCHAR* wchar);
+#endif
 
 void write_to_file(const char* filepath, const char* data);
 

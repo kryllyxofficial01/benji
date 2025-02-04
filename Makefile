@@ -30,7 +30,8 @@ clean: mkbuild
 ifeq ($(OS), Windows_NT)
 	del /Q /S $(BUILD)\*
 else ifeq ($(shell uname), Linux)
-	rm -rf $(BUILD)/*
+	find $(BUILD) -maxdepth 1 -type f -exec rm -iv {} \;
+	rm -rf $(OBJ)/*
 endif
 
 mkbuild:

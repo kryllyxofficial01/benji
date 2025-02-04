@@ -94,8 +94,8 @@ result_t* get_cpu_clock_speed() {
         );
 
         if (result == BENJI_NO_ERROR) {
-            DWORD speed = 0;
-            DWORD data_type, data_size = sizeof(speed);
+            uint32_t speed = 0;
+            uint32_t data_type, data_size = sizeof(speed);
 
             result = RegQueryValueEx(
                 hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
@@ -140,7 +140,7 @@ result_t* get_cpu_logical_processors_count() {
 
 #ifdef _WIN32
     result_t* get_cpu_processor_info(processor_info_callback_t callback) {
-        DWORD length = 0;
+        uint32_t length = 0;
 
         GetLogicalProcessorInformation(NULL, &length);
 
@@ -156,7 +156,7 @@ result_t* get_cpu_logical_processors_count() {
             return result_error(-1, "GetLogicalProcessorInformation() failed");
         }
 
-        DWORD result = 0;
+        uint32_t result = 0;
 
         size_t count = length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
         for (size_t i = 0; i < count; i++) {
@@ -170,11 +170,11 @@ result_t* get_cpu_logical_processors_count() {
         return result_success((void*) (uintptr_t) result);
     }
 
-    DWORD count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
+    uint32_t count_cpu_cores(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
         return 1;
     }
 
-    DWORD count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
+    uint32_t count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info) {
         return __popcnt(info->ProcessorMask);
     }
 #endif

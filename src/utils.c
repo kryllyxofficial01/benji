@@ -64,31 +64,29 @@ size_t splitstr(const char* string, char*** tokens, const char character) {
     return count;  // Return the number of tokens
 }
 
-char* wcharp_to_charp(const WCHAR* wchar) {
-    if (wchar == NULL) {
-        return NULL;
+#ifdef _WIN32
+    char* wcharp_to_charp(const WCHAR* wchar) {
+        if (wchar == NULL) {
+            return NULL;
+        }
+
+        int size = WideCharToMultiByte(CP_UTF8, 0, wchar, -1, NULL, 0, NULL, NULL);
+
+        if (size == 0) {
+            return NULL;
+        }
+
+        char* string = malloc(size);
+
+        if (string == NULL) {
+            return NULL;
+        }
+
+        WideCharToMultiByte(CP_UTF8, 0, wchar, -1, string, size, NULL, NULL);
+
+        return string;
     }
-
-    int size = WideCharToMultiByte(CP_UTF8, 0, wchar, -1, NULL, 0, NULL, NULL);
-
-    if (size == 0) {
-        return NULL;
-    }
-
-    char* string = malloc(size);
-
-    if (string == NULL) {
-        return NULL;
-    }
-
-    WideCharToMultiByte(CP_UTF8, 0, wchar, -1, string, size, NULL, NULL);
-
-    return string;
-}
-
-result_t* make_int_result(int value) {
-    return result_success((void*) (uintptr_t) value);
-}
+#endif
 
 void write_to_file(const char* filepath, const char* data) {
     FILE* file = fopen(filepath, "w");

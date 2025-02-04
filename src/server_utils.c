@@ -32,7 +32,13 @@ BENJI_SC_ABI BENJI_SOCKET create_socket() {
     if (sock == BENJI_SOCKET_ERROR) {
         printf("Failed to close socket\n");
 
-        terminate(WSAGetLastError());
+        #if defined(_WIN32)
+            int error_code = WSAGetLastError();
+        #elif defined(__linux__)
+            int error_code = -1;
+        #endif
+
+        terminate(error_code);
     }
 
     return sock;
@@ -50,7 +56,13 @@ BENJI_SC_ABI void close_socket(BENJI_SOCKET sock) {
     if (return_code == BENJI_SOCKET_ERROR) {
         printf("Failed to close socket\n");
 
-        terminate(WSAGetLastError());
+        #if defined(_WIN32)
+            int error_code = WSAGetLastError();
+        #elif defined(__linux__)
+            int error_code = -1;
+        #endif
+
+        terminate(error_code);
     }
 }
 

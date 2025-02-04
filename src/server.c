@@ -22,7 +22,13 @@ BENJI_SC_ABI result_t* server_init() {
 
         close_socket(server_socket);
 
-        return result_error(WSAGetLastError(), "bind() failed");
+        #if defined(_WIN32)
+            int error_code = WSAGetLastError();
+        #elif defined(__linux__)
+            int error_code = -1;
+        #endif
+
+        return result_error(error_code, "bind() failed");
 
         // terminate(EXIT_FAILURE);
     }
@@ -32,7 +38,13 @@ BENJI_SC_ABI result_t* server_init() {
 
         close_socket(server_socket);
 
-        return result_error(WSAGetLastError(), "listen() failed");
+        #if defined(_WIN32)
+            int error_code = WSAGetLastError();
+        #elif defined(__linux__)
+            int error_code = -1;
+        #endif
+
+        return result_error(error_code, "listen() failed");
 
         terminate(EXIT_FAILURE);
     }
@@ -119,11 +131,22 @@ BENJI_SC_ABI result_t* server_accept_client(BENJI_SOCKET server_socket) {
     BENJI_SOCKET client_socket = accept(server_socket, (struct sockaddr*) &client, &client_length);
 
     if (client_socket == BENJI_INVALID_SOCKET) {
-        return result_error(WSAGetLastError(), "accept() failed");
+        #if defined(_WIN32)
+            int error_code = WSAGetLastError();
+        #elif defined(__linux__)
+            int error_code = -1;
+        #endif
+
+        return result_error(error_code, "accept() failed");
     }
 
-    u_long non_blocking_mode = true;
-    ioctlsocket(client_socket, FIONBIO, &non_blocking_mode);
+    #if defined(_WIN32)
+        u_long non_blocking_mode = true;
+        ioctlsocket(client_socket, FIONBIO, &non_blocking_mode);
+    #elif defined(__linux__)
+        int flags = fcntl(client_socket, F_GETFL, 0);
+        fcntl(client_socket, F_SETFL, flags | O_NONBLOCK);
+    #endif
 
     return result_success((void*) (uintptr_t) client_socket);
 }
@@ -141,11 +164,17 @@ BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
         bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
 
         if (bytes_received == BENJI_SOCKET_ERROR) {
-            if (WSAGetLastError() == WSAEWOULDBLOCK) {
+            #if defined(_WIN32)
+                bool is_blocking = WSAGetLastError() == WSAEWOULDBLOCK;
+            #elif defined(__linux__)
+                bool is_blocking = EAGAIN | EWOULDBLOCK;
+            #endif
+
+            if (is_blocking) {
                 if (tries < BENJI_MAX_TRIES) {
                     tries++;
 
-                    Sleep(50); // wait 50ms and try again
+                    SLEEP(50); // wait 50ms and try again
 
                     continue; // no data is available, just try again
                 }
@@ -154,7 +183,13 @@ BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
                 }
             }
             else {
-                return result_error(WSAGetLastError(), "recv() failed");
+                #if defined(_WIN32)
+                    int error_code = WSAGetLastError();
+                #elif defined(__linux__)
+                    int error_code = -1;
+                #endif
+
+                return result_error(error_code, "recv() failed");
             }
         }
 
@@ -179,7 +214,13 @@ BENJI_SC_ABI result_t* server_send_to_client(BENJI_SOCKET client_socket, const c
     int bytes_sent = send(client_socket, data, strlen(data) + 1, 0);
 
     if (bytes_sent == BENJI_SOCKET_ERROR) {
-        return result_error(WSAGetLastError(), "send() failed");
+        #if defined(_WIN32)
+            int error_code = WSAGetLastError();
+        #elif defined(__linux__)
+            int error_code = -1;
+        #endif
+
+        return result_error(error_code, "send() failed");
     }
 
     return result_success((void*) (uintptr_t) bytes_sent);

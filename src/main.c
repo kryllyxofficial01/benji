@@ -3,7 +3,7 @@
 #include "include/utils.h"
 
 int main(int argc, const char* argv[]) {
-    #if defined(_WIN32)
+    #ifdef _WIN32
         winsock_init();
     #endif
 
@@ -13,7 +13,9 @@ int main(int argc, const char* argv[]) {
 
     close_socket(server_socket);
 
-    winsock_cleanup();
+    #ifdef _WIN32
+        winsock_cleanup();
+    #endif
 
     return EXIT_SUCCESS;
 }

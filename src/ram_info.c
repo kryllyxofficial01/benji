@@ -6,7 +6,7 @@ result_t* get_ram_info() {
     info->total_memory = *(double*) result_unwrap(get_ram_total_memory());
     info->memory_load = *(double*) result_unwrap(get_ram_memory_load());
     info->free_memory = *(double*) result_unwrap(get_ram_free_memory());
-    info->speed = (WORD) (uintptr_t) result_unwrap(get_ram_speed());
+    info->speed = (uint16_t) (uintptr_t) result_unwrap(get_ram_speed());
 
     return result_success(info);
 }
@@ -58,7 +58,7 @@ result_t* get_ram_free_memory() {
 
 result_t* get_ram_speed() {
     #if defined(_WIN32)
-        DWORD size = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
+        uint32_t size = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
 
         if (size == 0) {
             return result_error(-1, "GetSystemFirmwareTable() failed");
@@ -72,8 +72,8 @@ result_t* get_ram_speed() {
             return result_error(-1, "GetSystemFirmwareTable() failed");
         }
 
-        BYTE* data = buffer->data;
-        BYTE* end = data + buffer->length;
+        uint8_t* data = buffer->data;
+        uint8_t* end = data + buffer->length;
 
         while (data < end) {
             SMBIOS_MEMORY_DEVICE* memory = (SMBIOS_MEMORY_DEVICE*) data;
@@ -81,7 +81,7 @@ result_t* get_ram_speed() {
             if (memory->type == BENJI_SMBIOS_MEMORY_DEVICE_TYPE) {
                 free(buffer);
 
-                WORD speed = *(WORD*) (data + BENJI_SMBIOS_SPEED_OFFSET);
+                uint16_t speed = *(uint16_t*) (data + BENJI_SMBIOS_SPEED_OFFSET);
 
                 return result_success((void*) (uintptr_t) speed);
             }
