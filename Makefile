@@ -24,13 +24,16 @@ endif
 $(OBJ)/%.o: src/%.c
 	$(GXX) $(GXX_FLAGS) -c $< -o $@
 
-.PHONY: clean
+ifeq ($(OS), Windows_NT)
 .SILENT: clean
+endif
+
+.PHONY: clean
 clean: mkbuild
 ifeq ($(OS), Windows_NT)
 	del /Q /S $(BUILD)\*
 else ifeq ($(shell uname), Linux)
-	find $(BUILD) -maxdepth 1 -type f -exec rm -iv {} \;
+	find $(BUILD) -maxdepth 1 -type f -exec rm {} \;
 	rm -rf $(OBJ)/*
 endif
 
