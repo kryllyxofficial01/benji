@@ -95,7 +95,7 @@ result_t* get_cpu_clock_speed() {
 
         if (result == BENJI_NO_ERROR) {
             uint32_t speed = 0;
-            uint32_t data_type, data_size = sizeof(speed);
+            unsigned long int data_type, data_size = sizeof(speed);
 
             result = RegQueryValueEx(
                 hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
@@ -140,7 +140,7 @@ result_t* get_cpu_logical_processors_count() {
 
 #ifdef _WIN32
     result_t* get_cpu_processor_info(processor_info_callback_t callback) {
-        uint32_t length = 0;
+        unsigned long int length = 0;
 
         GetLogicalProcessorInformation(NULL, &length);
 

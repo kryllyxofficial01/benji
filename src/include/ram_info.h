@@ -22,7 +22,7 @@ typedef struct _BENJI_RAM_INFO {
             uint16_t handle;
 
             uint16_t physical_memory_array_handle;
-            uint16_t memory_error_information_handle;
+            uint16_t error_information_handle;
 
             uint16_t total_width;
             uint16_t data_width;
@@ -31,7 +31,13 @@ typedef struct _BENJI_RAM_INFO {
             uint8_t form_factor;
             uint8_t device_set;
 
-            char device_locator[1];
+            char device_locator;
+            char bank_locator;
+
+            uint8_t  memory_type;
+            uint16_t type_detail;
+
+            uint16_t speed;
         } SMBIOS_MEMORY_DEVICE;
 
         typedef struct _RAW_SMBIOS_DATA {

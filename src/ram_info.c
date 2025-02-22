@@ -58,10 +58,50 @@ result_t* get_ram_free_memory() {
 
 result_t* get_ram_speed() {
     #if defined(_WIN32)
-        uint32_t size = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
+        // uint32_t size = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
 
+        // if (size == 0) {
+        //     return result_error(-1, "GetSystemFirmwareTable() failed");
+        // }
+
+        // RAW_SMBIOS_DATA* buffer = (RAW_SMBIOS_DATA*) malloc(size);
+
+        // if (!GetSystemFirmwareTable('RSMB', 0, buffer, size)) {
+        //     free(buffer);
+
+        //     return result_error(-1, "GetSystemFirmwareTable() failed");
+        // }
+
+        // uint8_t* data = buffer->data;
+        // uint8_t* end = data + buffer->length;
+
+        // while (data < end) {
+        //     SMBIOS_MEMORY_DEVICE* memory = (SMBIOS_MEMORY_DEVICE*) data;
+
+        //     if (memory->type == BENJI_SMBIOS_MEMORY_DEVICE_TYPE) {
+        //         free(buffer);
+
+        //         uint16_t speed = *(uint16_t*) (data + BENJI_SMBIOS_SPEED_OFFSET);
+
+        //         return result_success((void*) (uintptr_t) speed);
+        //     }
+
+        //     data += memory->length;
+
+        //     while (*data != 0 || *(data + 1) != 0) {
+        //         data++;
+        //     }
+
+        //     data += 2;
+        // }
+
+        // free(buffer);
+
+        // return result_error(-1, "could not collect memory speed");
+
+        unsigned long size = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
         if (size == 0) {
-            return result_error(-1, "GetSystemFirmwareTable() failed");
+            return result_error(-1, "Failed to get SMBIOS table size");
         }
 
         RAW_SMBIOS_DATA* buffer = (RAW_SMBIOS_DATA*) malloc(size);
@@ -69,26 +109,29 @@ result_t* get_ram_speed() {
         if (!GetSystemFirmwareTable('RSMB', 0, buffer, size)) {
             free(buffer);
 
-            return result_error(-1, "GetSystemFirmwareTable() failed");
+            return result_error(-1, "Failed to get SMBIOS table");
         }
 
         uint8_t* data = buffer->data;
         uint8_t* end = data + buffer->length;
+        uint16_t speed = 0;
+
+        bool found_memory_device = false;
 
         while (data < end) {
             SMBIOS_MEMORY_DEVICE* memory = (SMBIOS_MEMORY_DEVICE*) data;
 
-            if (memory->type == BENJI_SMBIOS_MEMORY_DEVICE_TYPE) {
-                free(buffer);
+            if (memory->type == BENJI_SMBIOS_MEMORY_DEVICE_TYPE) {  // Memory Device
+                found_memory_device = true;
 
-                uint16_t speed = *(uint16_t*) (data + BENJI_SMBIOS_SPEED_OFFSET);
-
-                return result_success((void*) (uintptr_t) speed);
+                if (memory->speed > 0) {
+                    speed = memory->speed;
+                }
             }
 
             data += memory->length;
 
-            while (*data != 0 || *(data + 1) != 0) {
+            while (data < end && (*data != 0 || *(data + 1) != 0)) {
                 data++;
             }
 
@@ -97,7 +140,13 @@ result_t* get_ram_speed() {
 
         free(buffer);
 
-        return result_error(-1, "could not collect memory speed");
+        if (!found_memory_device) {
+            return result_error(-1, "SMBIOS Type 17 (Memory Device) not found");
+        } else if (speed == 0) {
+            return result_error(-1, "RAM speed reported as 0 (unknown/unsupported by BIOS)");
+        }
+
+        return result_success((void*) (uintptr_t) speed);
     #endif
 }
 
