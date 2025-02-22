@@ -5,8 +5,6 @@
 
 #include "utils.h"
 
-#include "map.h"
-
 typedef struct _BENJI_RAM_INFO {
     double total_memory; // in GB
     double memory_load; // in GB

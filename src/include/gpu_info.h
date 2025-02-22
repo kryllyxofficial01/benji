@@ -5,8 +5,6 @@
 
 #include "utils.h"
 
-#include "map.h"
-
 typedef struct _BENJI_GPU_INFO {
     char* name;
     char* vendor;

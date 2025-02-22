@@ -9,6 +9,7 @@
 #include <ctype.h>
 
 #include "result.h"
+#include "map.h"
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */

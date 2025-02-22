@@ -5,8 +5,6 @@
 
 #include "utils.h"
 
-#include "map.h"
-
 #if defined(_WIN32)
     #include <intrin.h>
     #include <unistd.h>
