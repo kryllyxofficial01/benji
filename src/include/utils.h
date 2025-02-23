@@ -106,6 +106,4 @@ size_t splitstr(const char* string, char*** tokens, const char character); // re
     char* wcharp_to_charp(const WCHAR* wchar);
 #endif
 
-void write_to_file(const char* filepath, const char* data);
-
 #endif
