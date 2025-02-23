@@ -3,14 +3,57 @@
 result_t* get_gpu_info() {
     gpu_info_t* info = malloc(sizeof(gpu_info_t));
 
-    info->name = strdup((char*) result_unwrap(get_gpu_name()));
+    result_t* gpu_name_result = get_gpu_name();
+    if (gpu_name_result->is_error) {
+        return result_error(
+            gpu_name_result->payload.error.code,
+            gpu_name_result->payload.error.error_message
+        );
+    }
+
+    info->name = strdup((char*) result_unwrap(gpu_name_result));
     strtrim(info->name);
 
-    info->vendor = strdup((char*) result_unwrap(get_gpu_vendor()));
+    result_t* gpu_vendor_result = get_gpu_vendor();
+    if (gpu_vendor_result->is_error) {
+        return result_error(
+            gpu_vendor_result->payload.error.code,
+            gpu_vendor_result->payload.error.error_message
+        );
+    }
 
-    info->dedicated_video_memory = *(double*) result_unwrap(get_gpu_dedicated_video_memory());
-    info->dedicated_system_memory = *(double*) result_unwrap(get_gpu_dedicated_system_memory());
-    info->shared_system_memory = *(double*) result_unwrap(get_gpu_shared_system_memory());
+    info->vendor = strdup((char*) result_unwrap(gpu_vendor_result));
+    strtrim(info->vendor);
+
+    result_t* gpu_dedicated_video_memory_result = get_gpu_dedicated_video_memory();
+    if (gpu_dedicated_video_memory_result->is_error) {
+        return result_error(
+            gpu_dedicated_video_memory_result->payload.error.code,
+            gpu_dedicated_video_memory_result->payload.error.error_message
+        );
+    }
+
+    info->dedicated_video_memory = *(double*) result_unwrap(gpu_dedicated_video_memory_result);
+
+    result_t* gpu_dedicated_system_memory_result = get_gpu_dedicated_system_memory();
+    if (gpu_dedicated_system_memory_result->is_error) {
+        return result_error(
+            gpu_dedicated_system_memory_result->payload.error.code,
+            gpu_dedicated_system_memory_result->payload.error.error_message
+        );
+    }
+
+    info->dedicated_system_memory = *(double*) result_unwrap(gpu_dedicated_system_memory_result);
+
+    result_t* gpu_shared_system_memory_result = get_gpu_shared_system_memory();
+    if (gpu_shared_system_memory_result->is_error) {
+        return result_error(
+            gpu_shared_system_memory_result->payload.error.code,
+            gpu_shared_system_memory_result->payload.error.error_message
+        );
+    }
+
+    info->shared_system_memory = *(double*) result_unwrap(gpu_shared_system_memory_result);
 
     return result_success(info);
 }
