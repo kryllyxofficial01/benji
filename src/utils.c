@@ -17,6 +17,10 @@ void strtrim(char* string) {
 }
 
 size_t splitstr(const char* string, char*** tokens, const char character) {
+    if (!string) {
+        return 0;
+    }
+
     int string_length = strlen(string);
     size_t count = 0;
 
@@ -31,9 +35,14 @@ size_t splitstr(const char* string, char*** tokens, const char character) {
         count--;
     }
 
+    if (count == 0) {
+        *tokens = NULL;
+        return 0; // none of the specified character were found
+    }
+
     *tokens = malloc(BENJI_CAPACITY(count, char*));
     if (*tokens == NULL) {
-        return 0; // return 0 cause we havent processed any tokens yet
+        return 0; // return 0 because we havent processed any tokens yet
     }
 
     int index = 0, start = 0;

@@ -7,9 +7,35 @@ int main(int argc, const char* argv[]) {
         winsock_init();
     #endif
 
-    BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_init());
+    result_t* server_socket_result = server_init();
+    if (server_socket_result->is_error) {
+        printf(
+            "A fatal error with code %i occured during creation of server socket: %s",
+            server_socket_result->payload.error.code,
+            server_socket_result->payload.error.error_message
+        );
 
-    server_run(server_socket);
+        result_free(server_socket_result);
+
+        terminate(server_socket_result->payload.error.code);
+    }
+
+    BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_socket_result);
+
+    result_t* server_status_result = server_run(server_socket);
+    if (server_status_result->is_error) {
+        printf(
+            "A fatal error with code %i occured while running the server: %s",
+            server_status_result->payload.error.code,
+            server_status_result->payload.error.error_message
+        );
+
+        result_free(server_status_result);
+
+        close_socket(server_socket);
+
+        terminate(server_status_result->payload.error.code);
+    }
 
     close_socket(server_socket);
 

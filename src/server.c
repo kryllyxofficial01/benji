@@ -61,51 +61,126 @@ BENJI_SC_ABI result_t* server_init() {
     return result_success((void*) (uintptr_t) server_socket);
 }
 
-BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
+BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
     while (server_status == BENJI_SERVER_RUNNING) {
-        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_accept_client(server_socket));
+        result_t* client_socket_result = server_accept_client(server_socket);
+        if (client_socket_result->is_error) {
+            server_status = BENJI_SERVER_STOPPED;
 
-        char* data = (char*) result_unwrap(server_receive_from_client(client_socket));
+            return result_error(
+                client_socket_result->payload.error.code,
+                client_socket_result->payload.error.error_message
+            );
+        }
+
+        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_socket_result);
+
+        result_t* client_data_result = server_receive_from_client(client_socket);
+        if (client_data_result->is_error) {
+            server_status = BENJI_SERVER_STOPPED;
+
+            return result_error(
+                client_data_result->payload.error.code,
+                client_data_result->payload.error.error_message
+            );
+        }
+
+        char* client_data = (char*) result_unwrap(client_data_result);
+
         char** data_groups;
+        size_t data_group_count = server_parse_client_data(client_data, &data_groups);
 
-        size_t data_group_count = (size_t) (uintptr_t) result_unwrap(server_parse_client_data(data, &data_groups));
+        free(client_data);
 
         char* json = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
         json[0] = '\0';
 
+        if (data_groups == NULL || data_group_count <= 0) {
+            printf("No client data received or was incorrectly formatted, skipping...\n");
+
+            close_socket(client_socket);
+
+            continue;
+        }
+
         for (size_t i = 0; i < data_group_count; i++) {
+            if (data_groups[i] == NULL) {
+                printf("Invalid data group index %lli, skipping...\n");
+
+                close_socket(client_socket);
+
+                continue;
+            }
+
             map_t* map_data;
             char* header;
 
             if (strcmp(data_groups[i], "cpu_all") == 0) {
-                cpu_info_t* cpu_info = (cpu_info_t*) result_unwrap(get_cpu_info());
-                map_data = cpu_info_to_map(*cpu_info);
+                result_t* cpu_info_result = get_cpu_info();
+                if (cpu_info_result->is_error) {
+                    server_status = BENJI_SERVER_STOPPED;
+
+                    return result_error(
+                        cpu_info_result->payload.error.code,
+                        cpu_info_result->payload.error.error_message
+                    );
+                }
+
+                cpu_info_t cpu_info = *(cpu_info_t*) result_unwrap(cpu_info_result);
+
+                map_data = cpu_info_to_map(cpu_info);
 
                 header = "cpu_info";
             }
             else if (strcmp(data_groups[i], "gpu_all") == 0) {
-                gpu_info_t* gpu_info = (gpu_info_t*) result_unwrap(get_gpu_info());
-                map_data = gpu_info_to_map(*gpu_info);
+                result_t* gpu_info_result = get_gpu_info();
+                if (gpu_info_result->is_error) {
+                    server_status = BENJI_SERVER_STOPPED;
+
+                    return result_error(
+                        gpu_info_result->payload.error.code,
+                        gpu_info_result->payload.error.error_message
+                    );
+                }
+
+                gpu_info_t gpu_info = *(gpu_info_t*) result_unwrap(gpu_info_result);
+
+                map_data = gpu_info_to_map(gpu_info);
 
                 header = "gpu_info";
             }
             else if (strcmp(data_groups[i], "ram_all") == 0) {
-                ram_info_t* ram_info = (ram_info_t*) result_unwrap(get_ram_info());
-                map_data = ram_info_to_map(*ram_info);
+                result_t* ram_info_result = get_ram_info();
+                if (ram_info_result->is_error) {
+                    server_status = BENJI_SERVER_STOPPED;
+
+                    return result_error(
+                        ram_info_result->payload.error.code,
+                        ram_info_result->payload.error.error_message
+                    );
+                }
+
+                ram_info_t ram_info = *(ram_info_t*) result_unwrap(ram_info_result);
+
+                map_data = ram_info_to_map(ram_info);
 
                 header = "ram_info";
             }
+
+            free(data_groups[i]);
 
             char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
             json_block[0] = '\0';
 
             sprintf(json_block, "%s,", map_serialize(map_data, header));
-
             strcat(json, json_block);
 
             free(json_block);
+
             map_free(map_data);
         }
+
+        free(data_groups);
 
         size_t json_length = strlen(json);
 
@@ -114,10 +189,17 @@ BENJI_SC_ABI void server_run(BENJI_SOCKET server_socket) {
         char response[json_length + 2];
         sprintf(response, "{%s}", json);
 
-        server_send_to_client(client_socket, response);
-
-        free(data);
         free(json);
+
+        result_t* response_result = server_send_to_client(client_socket, response);
+        if (response_result->is_error) {
+            server_status = BENJI_SERVER_STOPPED;
+
+            return result_error(
+                response_result->payload.error.code,
+                response_result->payload.error.error_message
+            );
+        }
 
         close_socket(client_socket);
     }
@@ -226,6 +308,6 @@ BENJI_SC_ABI result_t* server_send_to_client(BENJI_SOCKET client_socket, const c
     return result_success((void*) (uintptr_t) bytes_sent);
 }
 
-result_t* server_parse_client_data(const char* client_data, char*** data_groups) {
-    return result_success((void*) (uintptr_t) splitstr(client_data, data_groups, ';'));
+size_t server_parse_client_data(const char* client_data, char*** data_groups) {
+    return splitstr(client_data, data_groups, ';');
 }
