@@ -13,14 +13,24 @@ BENJI_SC_ABI result_t* server_init() {
 
     server_status = BENJI_SERVER_STOPPED;
 
-    printf("Creating server socket ... ");
+    result_t* server_socket_result = create_socket();
+    if (server_socket_result->is_error) {
+        return result_error(
+            server_socket_result->payload.error.code,
+            server_socket_result->payload.error.error_message
+        );
+    }
 
-    BENJI_SOCKET server_socket = create_socket();
+    BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_socket_result);
 
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == BENJI_SOCKET_ERROR) {
-        printf("Failed to bind to server address\n");
-
-        close_socket(server_socket);
+        result_t* close_server_socket_result = close_socket(server_socket);
+        if (close_server_socket_result->is_error) {
+            return result_error(
+                close_server_socket_result->payload.error.code,
+                close_server_socket_result->payload.error.error_message
+            );
+        }
 
         #if defined(_WIN32)
             int error_code = WSAGetLastError();
@@ -28,15 +38,17 @@ BENJI_SC_ABI result_t* server_init() {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "bind() failed");
-
-        // terminate(EXIT_FAILURE);
+        return result_error(error_code, "Failed to bind server socket to server address");
     }
 
     if (listen(server_socket, BENJI_MAX_SOCK_CONNS) == BENJI_SOCKET_ERROR) {
-        printf("Failed to put into listening mode\n");
-
-        close_socket(server_socket);
+        result_t* close_server_socket_result = close_socket(server_socket);
+        if (close_server_socket_result->is_error) {
+            return result_error(
+                close_server_socket_result->payload.error.code,
+                close_server_socket_result->payload.error.error_message
+            );
+        }
 
         #if defined(_WIN32)
             int error_code = WSAGetLastError();
@@ -44,12 +56,8 @@ BENJI_SC_ABI result_t* server_init() {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "listen() failed");
-
-        terminate(EXIT_FAILURE);
+        return result_error(error_code, "Failed to put server socket into listening mode");
     }
-
-    printf("Success\n\n");
 
     socklen_t server_address_length = sizeof(server_address);
     getsockname(server_socket, (struct sockaddr*) &server_address, &server_address_length);
@@ -96,18 +104,26 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
         json[0] = '\0';
 
         if (data_groups == NULL || data_group_count <= 0) {
-            printf("No client data received or was incorrectly formatted, skipping...\n");
-
-            close_socket(client_socket);
+            result_t* close_server_socket_result = close_socket(client_socket);
+            if (close_server_socket_result->is_error) {
+                return result_error(
+                    close_server_socket_result->payload.error.code,
+                    close_server_socket_result->payload.error.error_message
+                );
+            }
 
             continue;
         }
 
         for (size_t i = 0; i < data_group_count; i++) {
             if (data_groups[i] == NULL) {
-                printf("Invalid data group index %lli, skipping...\n");
-
-                close_socket(client_socket);
+                result_t* close_server_socket_result = close_socket(client_socket);
+                if (close_server_socket_result->is_error) {
+                    return result_error(
+                        close_server_socket_result->payload.error.code,
+                        close_server_socket_result->payload.error.error_message
+                    );
+                }
 
                 continue;
             }
@@ -201,7 +217,13 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
             );
         }
 
-        close_socket(client_socket);
+        result_t* close_server_socket_result = close_socket(client_socket);
+        if (close_server_socket_result->is_error) {
+            return result_error(
+                close_server_socket_result->payload.error.code,
+                close_server_socket_result->payload.error.error_message
+            );
+        }
     }
 }
 

@@ -32,12 +32,30 @@ int main(int argc, const char* argv[]) {
 
         result_free(server_status_result);
 
-        close_socket(server_socket);
+        result_t* close_server_socket_result = close_socket(server_socket);
+        if (close_server_socket_result->is_error) {
+            int error_code = close_server_socket_result->payload.error.code;
+
+            result_free(close_server_socket_result);
+
+            terminate(error_code);
+        }
+
+        result_free(close_server_socket_result);
 
         terminate(server_status_result->payload.error.code);
     }
 
-    close_socket(server_socket);
+    result_t* close_server_socket_result = close_socket(server_socket);
+    if (close_server_socket_result->is_error) {
+        int error_code = close_server_socket_result->payload.error.code;
+
+        result_free(close_server_socket_result);
+
+        terminate(error_code);
+    }
+
+    result_free(close_server_socket_result);
 
     #ifdef _WIN32
         winsock_cleanup();
