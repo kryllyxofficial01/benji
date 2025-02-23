@@ -3,7 +3,7 @@
 
 #define BENJI_USE_SYS_INFO_UTILS
 
-#include "utils.h"
+#include "../utils.h"
 
 typedef struct _BENJI_RAM_INFO {
     double total_memory; // in GB

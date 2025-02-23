@@ -1,4 +1,4 @@
-#include "include/gpu_info.h"
+#include "include/hardware/gpu_info.h"
 
 result_t* get_gpu_info() {
     gpu_info_t* info = malloc(sizeof(gpu_info_t));

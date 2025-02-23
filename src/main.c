@@ -1,6 +1,4 @@
 #include "include/server.h"
-#include "include/cpu_info.h"
-#include "include/utils.h"
 
 int main(int argc, const char* argv[]) {
     #ifdef _WIN32

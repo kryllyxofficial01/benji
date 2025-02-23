@@ -1,4 +1,4 @@
-#include "include/ram_info.h"
+#include "include/hardware/ram_info.h"
 
 result_t* get_ram_info() {
     ram_info_t* info = malloc(sizeof(ram_info_t));
