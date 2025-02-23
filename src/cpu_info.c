@@ -3,18 +3,68 @@
 result_t* get_cpu_info() {
     cpu_info_t* info = malloc(sizeof(cpu_info_t));
 
-    info->name = strdup((char*) result_unwrap(get_cpu_name()));
+    result_t* cpu_name_result = get_cpu_name();
+    if (cpu_name_result->is_error) {
+        return result_error(
+            cpu_name_result->payload.error.code,
+            cpu_name_result->payload.error.error_message
+        );
+    }
+
+    info->name = strdup((char*) result_unwrap(cpu_name_result));
     strtrim(info->name);
 
-    info->vendor = strdup((char*) result_unwrap(get_cpu_vendor()));
+    result_t* cpu_vendor_result = get_cpu_vendor();
+    if (cpu_vendor_result->is_error) {
+        return result_error(
+            cpu_vendor_result->payload.error.code,
+            cpu_vendor_result->payload.error.error_message
+        );
+    }
+
+    info->vendor = strdup((char*) result_unwrap(cpu_vendor_result));
     strtrim(info->vendor);
 
-    info->arch = strdup((char*) result_unwrap(get_cpu_arch()));
-    strtrim(info->name);
+    result_t* cpu_arch_result = get_cpu_arch();
+    if (cpu_arch_result->is_error) {
+        return result_error(
+            cpu_arch_result->payload.error.code,
+            cpu_arch_result->payload.error.error_message
+        );
+    }
 
-    info->clock_speed = *(double*) result_unwrap(get_cpu_clock_speed());
-    info->core_count = (size_t) (uintptr_t) result_unwrap(get_cpu_core_count());
-    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap(get_cpu_logical_processors_count());
+    info->arch = strdup((char*) result_unwrap(cpu_arch_result));
+    strtrim(info->arch);
+
+    result_t* cpu_clock_speed_result = get_cpu_clock_speed();
+    if (cpu_clock_speed_result->is_error) {
+        return result_error(
+            cpu_clock_speed_result->payload.error.code,
+            cpu_clock_speed_result->payload.error.error_message
+        );
+    }
+
+    info->clock_speed = *(double*) result_unwrap(cpu_clock_speed_result);
+
+    result_t* cpu_core_count_result = get_cpu_core_count();
+    if (cpu_core_count_result->is_error) {
+        return result_error(
+            cpu_core_count_result->payload.error.code,
+            cpu_core_count_result->payload.error.error_message
+        );
+    }
+
+    info->core_count = (size_t) (uintptr_t) result_unwrap(cpu_core_count_result);
+
+    result_t* cpu_logical_processors_count_result = get_cpu_logical_processors_count();
+    if (cpu_logical_processors_count_result->is_error) {
+        return result_error(
+            cpu_logical_processors_count_result->payload.error.code,
+            cpu_logical_processors_count_result->payload.error.error_message
+        );
+    }
+
+    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap(cpu_logical_processors_count_result);
 
     return result_success(info);
 }
@@ -74,7 +124,7 @@ result_t* get_cpu_arch() {
             case PROCESSOR_ARCHITECTURE_IA64: arch = "IA-64"; break;
 
             case PROCESSOR_ARCHITECTURE_UNKNOWN: // make this one fall through because i dont wanna deal with edge cases
-            default: arch = "??"; break;
+            default: arch = "???"; break;
         }
 
         return result_success(arch);
