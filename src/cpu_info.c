@@ -74,7 +74,13 @@ result_t* get_cpu_name() {
         int cpuid_info[BENJI_CPUID_BUFFER_LENGTH];
 
         char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-        cpu_name[0] = '\0';
+
+        if (cpu_name) {
+            cpu_name[0] = '\0';
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         for (int i = 0; i < BENJI_CPUID_CPU_NAME_SECTIONS_COUNT; ++i) {
             __cpuid(cpuid_info, BENJI_CPUID_CPU_NAME_START + i);
@@ -92,7 +98,13 @@ result_t* get_cpu_vendor() {
         int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
 
         char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-        cpu_vendor[0] = '\0';
+
+        if (cpu_vendor) {
+            cpu_vendor[0] = '\0';
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         __cpuid(cpu_info, 0);
 
@@ -143,29 +155,32 @@ result_t* get_cpu_clock_speed() {
             0, KEY_READ, &hkey
         );
 
-        if (result == BENJI_NO_ERROR) {
-            uint32_t speed = 0;
-            unsigned long int data_type, data_size = sizeof(speed);
+        if (result != BENJI_NO_ERROR) {
+            return result_error(result, "RegOpenKeyEx() failed");
+        }
 
-            result = RegQueryValueEx(
-                hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
-            );
+        uint32_t speed = 0;
+        unsigned long int data_type, data_size = sizeof(speed);
 
-            RegCloseKey(hkey);
+        result = RegQueryValueEx(
+            hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
+        );
 
-            if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {
-                void* speed_ghz = malloc(sizeof(double));
+        if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {
+            result = RegCloseKey(hkey);
 
-                *(double*) speed_ghz = speed / 1000.0;
-
-                return result_success(speed_ghz);
+            if (result != BENJI_NO_ERROR) {
+                return result_error(result, "RegCloseKey() failed");
             }
-            else {
-                return result_error(result, "RegQueryValueEx() failed");
-            }
+
+            void* speed_ghz = malloc(sizeof(double));
+
+            *(double*) speed_ghz = speed / 1000.0;
+
+            return result_success(speed_ghz);
         }
         else {
-            return result_error(result, "RegOpenKeyEx() failed");
+            return result_error(result, "RegQueryValueEx() failed");
         }
     #elif defined(__linux__)
         /* TODO: add linux stuff */
@@ -197,7 +212,7 @@ result_t* get_cpu_logical_processors_count() {
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
 
         if (!buffer) {
-            return result_error(-1, "buffer is NULL");
+            return result_error(-1, "malloc() failed");
         }
 
         if (!GetLogicalProcessorInformation(buffer, &length)) {

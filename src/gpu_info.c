@@ -63,11 +63,18 @@ result_t* get_gpu_name() {
         DISPLAY_DEVICEW device;
         device.cb = sizeof(DISPLAY_DEVICEW);
 
-        for (int i = 0; EnumDisplayDevicesW(NULL, i, &device, 0); i++) {
+        int i = 0;
+        while (true) {
+            if (!EnumDisplayDevicesW(NULL, i, &device, 0)) {
+                return result_error(GetLastError(), "EnumDisplayDevicesW() failed");
+            }
+
             // get the primary GPU
             if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
                 return result_success(wcharp_to_charp(device.DeviceString));
             }
+
+            i++;
         }
 
         return result_error(-1, "no primary GPU found");
@@ -80,9 +87,17 @@ result_t* get_gpu_vendor() {
     #if defined(_WIN32)
         char* vendor;
 
-        DXGI_ADAPTER_DESC* description = (DXGI_ADAPTER_DESC*) result_unwrap(get_gpu_description());
+        result_t* description_result = get_gpu_description();
+        if (description_result->is_error) {
+            return result_error(
+                description_result->payload.error.code,
+                description_result->payload.error.error_message
+            );
+        }
 
-        switch (description->VendorId) {
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
+
+        switch (description.VendorId) {
             case BENJI_GPU_VENDOR_INTEL: vendor = "Intel"; break;
             case BENJI_GPU_VENDOR_AMD: vendor = "AMD"; break;
             case BENJI_GPU_VENDOR_NVIDIA: vendor = "NVIDIA"; break;
@@ -98,11 +113,24 @@ result_t* get_gpu_vendor() {
 
 result_t* get_gpu_dedicated_video_memory() {
     #if defined(_WIN32)
-        DXGI_ADAPTER_DESC* description = (DXGI_ADAPTER_DESC*) result_unwrap(get_gpu_description());
+        result_t* description_result = get_gpu_description();
+        if (description_result->is_error) {
+            return result_error(
+                description_result->payload.error.code,
+                description_result->payload.error.error_message
+            );
+        }
+
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = description->DedicatedVideoMemory / (1024.0 * 1024.0 * 1024.0);
+        if (memory) {
+            *(double*) memory = description.DedicatedVideoMemory / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -112,11 +140,24 @@ result_t* get_gpu_dedicated_video_memory() {
 
 result_t* get_gpu_dedicated_system_memory() {
     #if defined(_WIN32)
-        DXGI_ADAPTER_DESC* description = (DXGI_ADAPTER_DESC*) result_unwrap(get_gpu_description());
+        result_t* description_result = get_gpu_description();
+        if (description_result->is_error) {
+            return result_error(
+                description_result->payload.error.code,
+                description_result->payload.error.error_message
+            );
+        }
+
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = description->DedicatedSystemMemory / (1024.0 * 1024.0 * 1024.0);
+        if (memory) {
+            *(double*) memory = description.DedicatedSystemMemory / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -126,11 +167,24 @@ result_t* get_gpu_dedicated_system_memory() {
 
 result_t* get_gpu_shared_system_memory() {
     #if defined(_WIN32)
-        DXGI_ADAPTER_DESC* description = (DXGI_ADAPTER_DESC*) result_unwrap(get_gpu_description());
+        result_t* description_result = get_gpu_description();
+        if (description_result->is_error) {
+            return result_error(
+                description_result->payload.error.code,
+                description_result->payload.error.error_message
+            );
+        }
+
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = description->SharedSystemMemory / (1024.0 * 1024.0 * 1024.0);
+        if (memory) {
+            *(double*) memory = description.SharedSystemMemory / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -155,6 +209,10 @@ result_t* get_gpu_shared_system_memory() {
 
         IDXGIAdapter* primary_adapter = NULL;
         DXGI_ADAPTER_DESC* primary_adapter_description = malloc(sizeof(DXGI_ADAPTER_DESC));
+
+        if (!primary_adapter_description) {
+            return result_error(-1, "malloc() failed");
+        }
 
         IDXGIAdapter* adapter = NULL;
         UINT index = 0;

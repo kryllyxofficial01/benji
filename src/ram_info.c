@@ -48,11 +48,24 @@ result_t* get_ram_info() {
 
 result_t* get_ram_total_memory() {
     #if defined(_WIN32)
-        MEMORYSTATUSEX* status = (MEMORYSTATUSEX*) result_unwrap(get_memory_status());
+        result_t* status_result = get_memory_status();
+        if (status_result->is_error) {
+            return result_error(
+                status_result->payload.error.code,
+                status_result->payload.error.error_message
+            );
+        }
+
+        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap(status_result);
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = status->ullTotalPhys / (1024.0 * 1024.0 * 1024.0);
+        if (memory) {
+            *(double*) memory = status.ullTotalPhys / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -62,14 +75,35 @@ result_t* get_ram_total_memory() {
 
 result_t* get_ram_memory_load() {
     #if defined(_WIN32)
-        MEMORYSTATUSEX* status = (MEMORYSTATUSEX*) result_unwrap(get_memory_status());
+        result_t* status_result = get_memory_status();
+        if (status_result->is_error) {
+            return result_error(
+                status_result->payload.error.code,
+                status_result->payload.error.error_message
+            );
+        }
 
-        double total = *(double*) result_unwrap(get_ram_total_memory());
-        double percent = status->dwMemoryLoad / 100.0; // dwMemoryLoad returns a value between [0, 100]
+        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap(status_result);
+
+        result_t* total_memory_result = get_ram_total_memory();
+        if (total_memory_result->is_error) {
+            return result_error(
+                total_memory_result->payload.error.code,
+                total_memory_result->payload.error.error_message
+            );
+        }
+
+        double total_memory = *(double*) result_unwrap(total_memory_result);
+        double percent = status.dwMemoryLoad / 100.0; // dwMemoryLoad returns a value between [0, 100]
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = total * percent; // total is already in GB, so no need to convert
+        if (memory) {
+            *(double*) memory = total_memory * percent; // total memory is already in GB, so no need to convert
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -79,11 +113,24 @@ result_t* get_ram_memory_load() {
 
 result_t* get_ram_free_memory() {
     #if defined(_WIN32)
-        MEMORYSTATUSEX* status = (MEMORYSTATUSEX*) result_unwrap(get_memory_status());
+        result_t* status_result = get_memory_status();
+        if (status_result->is_error) {
+            return result_error(
+                status_result->payload.error.code,
+                status_result->payload.error.error_message
+            );
+        }
+
+        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap(status_result);
 
         void* memory = malloc(sizeof(double));
 
-        *(double*) memory = status->ullAvailPhys / (1024.0 * 1024.0 * 1024.0);
+        if (memory) {
+            *(double*) memory = status.ullAvailPhys / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         return result_success(memory);
     #elif defined(__linux__)
@@ -147,6 +194,10 @@ result_t* get_ram_speed() {
 #ifdef _WIN32
     result_t* get_memory_status() {
         MEMORYSTATUSEX* status = malloc(sizeof(MEMORYSTATUSEX));
+
+        if (!status) {
+            return result_error(-1, "malloc() failed");
+        }
 
         status->dwLength = sizeof(MEMORYSTATUSEX);
 
