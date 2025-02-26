@@ -8,7 +8,7 @@ int main(int argc, const char* argv[]) {
     result_t* server_socket_result = server_init();
     if (server_socket_result->is_error) {
         printf(
-            "A fatal error with code %i occured during creation of server socket: %s",
+            "A fatal error with code %i occured during creation of the server: %s",
             server_socket_result->payload.error.code,
             server_socket_result->payload.error.error_message
         );
