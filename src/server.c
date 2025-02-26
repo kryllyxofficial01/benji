@@ -14,23 +14,15 @@ BENJI_SC_ABI result_t* server_init() {
     server_status = BENJI_SERVER_STOPPED;
 
     result_t* server_socket_result = create_socket();
-    if (server_socket_result->is_error) {
-        return result_error(
-            server_socket_result->payload.error.code,
-            server_socket_result->payload.error.error_message
-        );
-    }
+
+    return_if_error(server_socket_result);
 
     BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_socket_result);
 
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == BENJI_SOCKET_ERROR) {
         result_t* close_server_socket_result = close_socket(server_socket);
-        if (close_server_socket_result->is_error) {
-            return result_error(
-                close_server_socket_result->payload.error.code,
-                close_server_socket_result->payload.error.error_message
-            );
-        }
+
+        return_if_error(close_server_socket_result);
 
         #if defined(_WIN32)
             int error_code = WSAGetLastError();
@@ -43,12 +35,8 @@ BENJI_SC_ABI result_t* server_init() {
 
     if (listen(server_socket, BENJI_MAX_SOCK_CONNS) == BENJI_SOCKET_ERROR) {
         result_t* close_server_socket_result = close_socket(server_socket);
-        if (close_server_socket_result->is_error) {
-            return result_error(
-                close_server_socket_result->payload.error.code,
-                close_server_socket_result->payload.error.error_message
-            );
-        }
+
+        return_if_error(close_server_socket_result);
 
         #if defined(_WIN32)
             int error_code = WSAGetLastError();
@@ -73,24 +61,22 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
     while (server_status == BENJI_SERVER_RUNNING) {
         result_t* client_socket_result = server_accept_client(server_socket);
         if (client_socket_result->is_error) {
-            server_status = BENJI_SERVER_STOPPED;
+            result_free(client_socket_result);
 
-            return result_error(
-                client_socket_result->payload.error.code,
-                client_socket_result->payload.error.error_message
-            );
+            // TODO: error logging
+
+            continue;
         }
 
         BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_socket_result);
 
         result_t* client_data_result = server_receive_from_client(client_socket);
         if (client_data_result->is_error) {
-            server_status = BENJI_SERVER_STOPPED;
+            result_free(client_data_result);
 
-            return result_error(
-                client_data_result->payload.error.code,
-                client_data_result->payload.error.error_message
-            );
+            // TODO: error logging
+
+            continue;
         }
 
         char* client_data = (char*) result_unwrap(client_data_result);
@@ -104,26 +90,24 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
         json[0] = '\0';
 
         if (data_groups == NULL || data_group_count <= 0) {
-            result_t* close_server_socket_result = close_socket(client_socket);
-            if (close_server_socket_result->is_error) {
-                return result_error(
-                    close_server_socket_result->payload.error.code,
-                    close_server_socket_result->payload.error.error_message
-                );
+            result_t* close_client_socket_result = close_socket(client_socket);
+            if (close_client_socket_result->is_error) {
+                // TODO: error logging
             }
+
+            result_free(close_client_socket_result);
 
             continue;
         }
 
         for (size_t i = 0; i < data_group_count; i++) {
             if (data_groups[i] == NULL) {
-                result_t* close_server_socket_result = close_socket(client_socket);
-                if (close_server_socket_result->is_error) {
-                    return result_error(
-                        close_server_socket_result->payload.error.code,
-                        close_server_socket_result->payload.error.error_message
-                    );
+                result_t* close_client_socket_result = close_socket(client_socket);
+                if (close_client_socket_result->is_error) {
+                    // TODO: error logging
                 }
+
+                result_free(close_client_socket_result);
 
                 continue;
             }
@@ -134,12 +118,11 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
             if (strcmp(data_groups[i], "cpu_all") == 0) {
                 result_t* cpu_info_result = get_cpu_info();
                 if (cpu_info_result->is_error) {
-                    server_status = BENJI_SERVER_STOPPED;
+                    result_free(cpu_info_result);
 
-                    return result_error(
-                        cpu_info_result->payload.error.code,
-                        cpu_info_result->payload.error.error_message
-                    );
+                    // TODO: error logging
+
+                    continue;
                 }
 
                 cpu_info_t cpu_info = *(cpu_info_t*) result_unwrap(cpu_info_result);
@@ -151,12 +134,11 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
             else if (strcmp(data_groups[i], "gpu_all") == 0) {
                 result_t* gpu_info_result = get_gpu_info();
                 if (gpu_info_result->is_error) {
-                    server_status = BENJI_SERVER_STOPPED;
+                    result_free(gpu_info_result);
 
-                    return result_error(
-                        gpu_info_result->payload.error.code,
-                        gpu_info_result->payload.error.error_message
-                    );
+                    // TODO: error logging
+
+                    continue;
                 }
 
                 gpu_info_t gpu_info = *(gpu_info_t*) result_unwrap(gpu_info_result);
@@ -168,12 +150,11 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
             else if (strcmp(data_groups[i], "ram_all") == 0) {
                 result_t* ram_info_result = get_ram_info();
                 if (ram_info_result->is_error) {
-                    server_status = BENJI_SERVER_STOPPED;
+                    result_free(ram_info_result);
 
-                    return result_error(
-                        ram_info_result->payload.error.code,
-                        ram_info_result->payload.error.error_message
-                    );
+                    // TODO: error logging
+
+                    continue;
                 }
 
                 ram_info_t ram_info = *(ram_info_t*) result_unwrap(ram_info_result);
@@ -209,21 +190,19 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         result_t* response_result = server_send_to_client(client_socket, response);
         if (response_result->is_error) {
-            server_status = BENJI_SERVER_STOPPED;
+            result_free(response_result);
 
-            return result_error(
-                response_result->payload.error.code,
-                response_result->payload.error.error_message
-            );
+            // TODO: error logging
+
+            continue;
         }
 
-        result_t* close_server_socket_result = close_socket(client_socket);
-        if (close_server_socket_result->is_error) {
-            return result_error(
-                close_server_socket_result->payload.error.code,
-                close_server_socket_result->payload.error.error_message
-            );
+        result_t* close_client_socket_result = close_socket(client_socket);
+        if (close_client_socket_result->is_error) {
+            // TODO: error logging
         }
+
+        result_free(close_client_socket_result);
     }
 }
 
