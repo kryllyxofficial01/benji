@@ -267,17 +267,17 @@ map_t* gpu_info_to_map(gpu_info_t gpu_info) {
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     buffer[0] = '\0';
 
-    map_insert(gpu_info_map, "gpu_name", gpu_info.name);
-    map_insert(gpu_info_map, "gpu_vendor", gpu_info.vendor);
+    map_insert(gpu_info_map, "name", gpu_info.name);
+    map_insert(gpu_info_map, "vendor", gpu_info.vendor);
 
     sprintf(buffer, "%0.3f", gpu_info.dedicated_video_memory);
-    map_insert(gpu_info_map, "gpu_dedicated_video_memory", buffer);
+    map_insert(gpu_info_map, "dedicated_video_memory", buffer);
 
     sprintf(buffer, "%0.3f", gpu_info.dedicated_system_memory);
-    map_insert(gpu_info_map, "gpu_dedicated_system_memory", buffer);
+    map_insert(gpu_info_map, "dedicated_system_memory", buffer);
 
     sprintf(buffer, "%0.3f", gpu_info.shared_system_memory);
-    map_insert(gpu_info_map, "gpu_shared_system_memory", buffer);
+    map_insert(gpu_info_map, "shared_system_memory", buffer);
 
     free(buffer);
 

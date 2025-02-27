@@ -219,16 +219,16 @@ map_t* ram_info_to_map(ram_info_t ram_info) {
     buffer[0] = '\0';
 
     sprintf(buffer, "%0.3f", ram_info.total_memory);
-    map_insert(ram_info_map, "ram_total_memory", buffer);
+    map_insert(ram_info_map, "total_memory", buffer);
 
     sprintf(buffer, "%0.3f", ram_info.memory_load);
-    map_insert(ram_info_map, "ram_memory_load", buffer);
+    map_insert(ram_info_map, "memory_load", buffer);
 
     sprintf(buffer, "%0.3f", ram_info.free_memory);
-    map_insert(ram_info_map, "ram_free_memory", buffer);
+    map_insert(ram_info_map, "free_memory", buffer);
 
     sprintf(buffer, "%i", ram_info.speed);
-    map_insert(ram_info_map, "ram_speed", buffer);
+    map_insert(ram_info_map, "speed", buffer);
 
     free(buffer);
 

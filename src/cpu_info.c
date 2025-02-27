@@ -250,18 +250,18 @@ map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     buffer[0] = '\0';
 
-    map_insert(cpu_info_map, "cpu_name", cpu_info.name);
-    map_insert(cpu_info_map, "cpu_vendor", cpu_info.vendor);
-    map_insert(cpu_info_map, "cpu_arch", cpu_info.arch);
+    map_insert(cpu_info_map, "name", cpu_info.name);
+    map_insert(cpu_info_map, "vendor", cpu_info.vendor);
+    map_insert(cpu_info_map, "arch", cpu_info.arch);
 
     sprintf(buffer, "%0.3f", cpu_info.clock_speed);
-    map_insert(cpu_info_map, "cpu_clock_speed", buffer);
+    map_insert(cpu_info_map, "clock_speed", buffer);
 
     sprintf(buffer, "%lli", cpu_info.core_count);
-    map_insert(cpu_info_map, "cpu_core_count", buffer);
+    map_insert(cpu_info_map, "core_count", buffer);
 
     sprintf(buffer, "%lli", cpu_info.logical_processors_count);
-    map_insert(cpu_info_map, "cpu_logical_processors_count", buffer);
+    map_insert(cpu_info_map, "logical_processors_count", buffer);
 
     free(buffer);
 
