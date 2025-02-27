@@ -3,9 +3,7 @@
 
 #define BENJI_USE_SERVER_UTILS
 
-#include "hardware/cpu_info.h"
-#include "hardware/gpu_info.h"
-#include "hardware/ram_info.h"
+#include "hardware.h"
 
 #include "utils.h"
 

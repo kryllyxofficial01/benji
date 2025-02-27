@@ -81,6 +81,8 @@
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
+
+    result_t* get_hardware_info();
 #endif
 
 #define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */

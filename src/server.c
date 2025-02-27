@@ -112,59 +112,18 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
                 continue;
             }
 
-            map_t* map_data;
             char* header;
 
-            if (strcmp(data_groups[i], "cpu_all") == 0) {
-                result_t* cpu_info_result = get_cpu_info();
-                if (cpu_info_result->is_error) {
-                    result_free(cpu_info_result);
+            result_t* map_data_result = get_hardware_info(data_groups[i], &header);
+            if (map_data_result->is_error) {
+                // TODO: error logging
 
-                    // TODO: error logging
+                result_free(map_data_result);
 
-                    continue;
-                }
-
-                cpu_info_t cpu_info = *(cpu_info_t*) result_unwrap(cpu_info_result);
-
-                map_data = cpu_info_to_map(cpu_info);
-
-                header = "cpu_info";
-            }
-            else if (strcmp(data_groups[i], "gpu_all") == 0) {
-                result_t* gpu_info_result = get_gpu_info();
-                if (gpu_info_result->is_error) {
-                    result_free(gpu_info_result);
-
-                    // TODO: error logging
-
-                    continue;
-                }
-
-                gpu_info_t gpu_info = *(gpu_info_t*) result_unwrap(gpu_info_result);
-
-                map_data = gpu_info_to_map(gpu_info);
-
-                header = "gpu_info";
-            }
-            else if (strcmp(data_groups[i], "ram_all") == 0) {
-                result_t* ram_info_result = get_ram_info();
-                if (ram_info_result->is_error) {
-                    result_free(ram_info_result);
-
-                    // TODO: error logging
-
-                    continue;
-                }
-
-                ram_info_t ram_info = *(ram_info_t*) result_unwrap(ram_info_result);
-
-                map_data = ram_info_to_map(ram_info);
-
-                header = "ram_info";
+                continue;
             }
 
-            free(data_groups[i]);
+            map_t* map_data = (map_t*) result_unwrap(map_data_result);
 
             char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
             json_block[0] = '\0';
