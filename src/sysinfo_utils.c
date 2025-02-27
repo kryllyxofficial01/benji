@@ -13,9 +13,9 @@ result_t* get_hardware_info(const char* hardware_group, char** header) {
 
         cpu_info_t cpu_info = *(cpu_info_t*) result_unwrap(cpu_info_result);
 
-        *header = "cpu_info";
-
         map_data = cpu_info_to_map(cpu_info);
+
+        *header = "cpu_info";
     }
     else if (strcmp(hardware_group, "gpu_all") == 0) {
         result_t* gpu_info_result = get_gpu_info();
