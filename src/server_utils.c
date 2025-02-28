@@ -13,7 +13,7 @@
 
     BENJI_SC_ABI void winsock_cleanup() {
         if (WSACleanup() == BENJI_SOCKET_ERROR) {
-            terminate(WSAGetLastError());
+            exit(WSAGetLastError());
         }
     }
 #endif
