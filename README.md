@@ -1,3 +1,3 @@
 # benji
 
-Collects meta data about the system (CPU info, current running processes, etc.) and periodically records it in JSON format to a local server
+A light background application written in C that collects hardware information upon requests to a TCP server created by Benji
