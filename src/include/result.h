@@ -17,6 +17,14 @@ typedef struct _BENJI_RESULT {
     } payload;
 } result_t;
 
+#define return_if_error(result) \
+    if (result->is_error) { \
+        return result_error( \
+            result->payload.error.code, \
+            result->payload.error.error_message \
+        ); \
+    }
+
 result_t* result_init();
 
 result_t* result_success(void* value);

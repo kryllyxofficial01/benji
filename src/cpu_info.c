@@ -1,20 +1,70 @@
-#include "include/cpu_info.h"
+#include "include/hardware/cpu_info.h"
 
 result_t* get_cpu_info() {
     cpu_info_t* info = malloc(sizeof(cpu_info_t));
 
-    info->name = strdup((char*) result_unwrap(get_cpu_name()));
+    result_t* cpu_name_result = get_cpu_name();
+    if (cpu_name_result->is_error) {
+        return result_error(
+            cpu_name_result->payload.error.code,
+            cpu_name_result->payload.error.error_message
+        );
+    }
+
+    info->name = strdup((char*) result_unwrap(cpu_name_result));
     strtrim(info->name);
 
-    info->vendor = strdup((char*) result_unwrap(get_cpu_vendor()));
+    result_t* cpu_vendor_result = get_cpu_vendor();
+    if (cpu_vendor_result->is_error) {
+        return result_error(
+            cpu_vendor_result->payload.error.code,
+            cpu_vendor_result->payload.error.error_message
+        );
+    }
+
+    info->vendor = strdup((char*) result_unwrap(cpu_vendor_result));
     strtrim(info->vendor);
 
-    info->arch = strdup((char*) result_unwrap(get_cpu_arch()));
-    strtrim(info->name);
+    result_t* cpu_arch_result = get_cpu_arch();
+    if (cpu_arch_result->is_error) {
+        return result_error(
+            cpu_arch_result->payload.error.code,
+            cpu_arch_result->payload.error.error_message
+        );
+    }
 
-    info->clock_speed = *(double*) result_unwrap(get_cpu_clock_speed());
-    info->core_count = (size_t) (uintptr_t) result_unwrap(get_cpu_core_count());
-    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap(get_cpu_logical_processors_count());
+    info->arch = strdup((char*) result_unwrap(cpu_arch_result));
+    strtrim(info->arch);
+
+    result_t* cpu_clock_speed_result = get_cpu_clock_speed();
+    if (cpu_clock_speed_result->is_error) {
+        return result_error(
+            cpu_clock_speed_result->payload.error.code,
+            cpu_clock_speed_result->payload.error.error_message
+        );
+    }
+
+    info->clock_speed = *(double*) result_unwrap(cpu_clock_speed_result);
+
+    result_t* cpu_core_count_result = get_cpu_core_count();
+    if (cpu_core_count_result->is_error) {
+        return result_error(
+            cpu_core_count_result->payload.error.code,
+            cpu_core_count_result->payload.error.error_message
+        );
+    }
+
+    info->core_count = (size_t) (uintptr_t) result_unwrap(cpu_core_count_result);
+
+    result_t* cpu_logical_processors_count_result = get_cpu_logical_processors_count();
+    if (cpu_logical_processors_count_result->is_error) {
+        return result_error(
+            cpu_logical_processors_count_result->payload.error.code,
+            cpu_logical_processors_count_result->payload.error.error_message
+        );
+    }
+
+    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap(cpu_logical_processors_count_result);
 
     return result_success(info);
 }
@@ -24,7 +74,13 @@ result_t* get_cpu_name() {
         int cpuid_info[BENJI_CPUID_BUFFER_LENGTH];
 
         char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-        cpu_name[0] = '\0';
+
+        if (cpu_name) {
+            cpu_name[0] = '\0';
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         for (int i = 0; i < BENJI_CPUID_CPU_NAME_SECTIONS_COUNT; ++i) {
             __cpuid(cpuid_info, BENJI_CPUID_CPU_NAME_START + i);
@@ -42,7 +98,13 @@ result_t* get_cpu_vendor() {
         int cpu_info[BENJI_CPUID_BUFFER_LENGTH];
 
         char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
-        cpu_vendor[0] = '\0';
+
+        if (cpu_vendor) {
+            cpu_vendor[0] = '\0';
+        }
+        else {
+            return result_error(-1, "malloc() failed");
+        }
 
         __cpuid(cpu_info, 0);
 
@@ -74,7 +136,7 @@ result_t* get_cpu_arch() {
             case PROCESSOR_ARCHITECTURE_IA64: arch = "IA-64"; break;
 
             case PROCESSOR_ARCHITECTURE_UNKNOWN: // make this one fall through because i dont wanna deal with edge cases
-            default: arch = "??"; break;
+            default: arch = "???"; break;
         }
 
         return result_success(arch);
@@ -93,29 +155,32 @@ result_t* get_cpu_clock_speed() {
             0, KEY_READ, &hkey
         );
 
-        if (result == BENJI_NO_ERROR) {
-            uint32_t speed = 0;
-            unsigned long int data_type, data_size = sizeof(speed);
+        if (result != BENJI_NO_ERROR) {
+            return result_error(result, "RegOpenKeyEx() failed");
+        }
 
-            result = RegQueryValueEx(
-                hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
-            );
+        uint32_t speed = 0;
+        unsigned long int data_type, data_size = sizeof(speed);
 
-            RegCloseKey(hkey);
+        result = RegQueryValueEx(
+            hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
+        );
 
-            if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {
-                void* speed_ghz = malloc(sizeof(double));
+        if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {
+            result = RegCloseKey(hkey);
 
-                *(double*) speed_ghz = speed / 1000.0;
-
-                return result_success(speed_ghz);
+            if (result != BENJI_NO_ERROR) {
+                return result_error(result, "RegCloseKey() failed");
             }
-            else {
-                return result_error(result, "RegQueryValueEx() failed");
-            }
+
+            void* speed_ghz = malloc(sizeof(double));
+
+            *(double*) speed_ghz = speed / 1000.0;
+
+            return result_success(speed_ghz);
         }
         else {
-            return result_error(result, "RegOpenKeyEx() failed");
+            return result_error(result, "RegQueryValueEx() failed");
         }
     #elif defined(__linux__)
         /* TODO: add linux stuff */
@@ -147,7 +212,7 @@ result_t* get_cpu_logical_processors_count() {
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
 
         if (!buffer) {
-            return result_error(-1, "buffer is NULL");
+            return result_error(-1, "malloc() failed");
         }
 
         if (!GetLogicalProcessorInformation(buffer, &length)) {
@@ -185,18 +250,18 @@ map_t* cpu_info_to_map(cpu_info_t cpu_info) {
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
     buffer[0] = '\0';
 
-    map_insert(cpu_info_map, "cpu_name", cpu_info.name);
-    map_insert(cpu_info_map, "cpu_vendor", cpu_info.vendor);
-    map_insert(cpu_info_map, "cpu_arch", cpu_info.arch);
+    map_insert(cpu_info_map, "name", cpu_info.name);
+    map_insert(cpu_info_map, "vendor", cpu_info.vendor);
+    map_insert(cpu_info_map, "arch", cpu_info.arch);
 
     sprintf(buffer, "%0.3f", cpu_info.clock_speed);
-    map_insert(cpu_info_map, "cpu_clock_speed", buffer);
+    map_insert(cpu_info_map, "clock_speed", buffer);
 
     sprintf(buffer, "%lli", cpu_info.core_count);
-    map_insert(cpu_info_map, "cpu_core_count", buffer);
+    map_insert(cpu_info_map, "core_count", buffer);
 
     sprintf(buffer, "%lli", cpu_info.logical_processors_count);
-    map_insert(cpu_info_map, "cpu_logical_processors_count", buffer);
+    map_insert(cpu_info_map, "logical_processors_count", buffer);
 
     free(buffer);
 

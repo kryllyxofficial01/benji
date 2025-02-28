@@ -9,6 +9,7 @@
 #include <ctype.h>
 
 #include "result.h"
+#include "map.h"
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */
@@ -55,8 +56,8 @@
     #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
     #define BENJI_MAX_TRIES 3 /* max attempts to try something */
 
-    BENJI_SC_ABI BENJI_SOCKET create_socket();
-    BENJI_SC_ABI void close_socket(BENJI_SOCKET sock);
+    BENJI_SC_ABI result_t* create_socket();
+    BENJI_SC_ABI result_t* close_socket(BENJI_SOCKET sock);
 
     BENJI_SC_ABI void terminate(const int exit_code);
 #endif
@@ -80,6 +81,14 @@
     #elif defined(__linux__)
         /* TODO: add linux stuff */
     #endif
+
+    #define collect_map_data(info_type, get_info, convert_to_map, map_data) \
+        result_t* info_result = get_info(); \
+        return_if_error(info_result); \
+        info_type cpu_info = *(info_type*) result_unwrap(info_result); \
+        map_data = convert_to_map(cpu_info);
+
+    result_t* get_hardware_info();
 #endif
 
 #define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
@@ -104,7 +113,5 @@ size_t splitstr(const char* string, char*** tokens, const char character); // re
 #ifdef _WIN32
     char* wcharp_to_charp(const WCHAR* wchar);
 #endif
-
-void write_to_file(const char* filepath, const char* data);
 
 #endif

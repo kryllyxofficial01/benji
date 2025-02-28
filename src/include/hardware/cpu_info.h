@@ -3,9 +3,7 @@
 
 #define BENJI_USE_SYS_INFO_UTILS
 
-#include "utils.h"
-
-#include "map.h"
+#include "../utils.h"
 
 #if defined(_WIN32)
     #include <intrin.h>

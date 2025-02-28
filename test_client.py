@@ -9,11 +9,13 @@ server_socket.connect((host, port))
 
 try:
     message = "ram_all;"
+
     print(f"Sending: {message}")
     server_socket.send(message.encode())
     print("Sent")
 
-    response = server_socket.recv(4096)
+    response = server_socket.recv(1024)
     print(f"Server response: {response.decode()}")
+
 finally:
     server_socket.close()
