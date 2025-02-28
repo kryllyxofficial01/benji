@@ -59,32 +59,17 @@ BENJI_SC_ABI result_t* server_init() {
 
 BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
     while (server_status == BENJI_SERVER_RUNNING) {
-        result_t* client_socket_result = server_accept_client(server_socket);
-        if (client_socket_result->is_error) {
-            result_free(client_socket_result);
-
-            // TODO: error logging
-
-            continue;
-        }
-
-        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_socket_result);
-
-        result_t* client_data_result = server_receive_from_client(client_socket);
-        if (client_data_result->is_error) {
-            result_free(client_data_result);
-
-            // TODO: error logging
-
-            continue;
-        }
-
-        char* client_data = (char*) result_unwrap(client_data_result);
-
         char** data_groups;
-        size_t data_group_count = server_parse_client_data(client_data, &data_groups);
+        size_t data_group_count;
 
-        free(client_data);
+        result_t* client_handle_result = server_handle_client(server_socket, &data_groups, &data_group_count);
+        if (client_handle_result->is_error) {
+            // TODO: error logging
+
+            continue;
+        }
+
+        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_handle_result);
 
         char* json = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
         json[0] = '\0';
@@ -163,6 +148,24 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         result_free(close_client_socket_result);
     }
+}
+
+BENJI_SC_ABI result_t* server_handle_client(BENJI_SOCKET server_socket, char*** data_groups, size_t* data_group_count) {
+    result_t* client_socket_result = server_accept_client(server_socket);
+    return_if_error(client_socket_result);
+
+    BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_socket_result);
+
+    result_t* client_data_result = server_receive_from_client(client_socket);
+    return_if_error(client_data_result);
+
+    char* client_data = (char*) result_unwrap(client_data_result);
+
+    *data_group_count = server_parse_client_data(client_data, data_groups);
+
+    free(client_data);
+
+    return result_success((void*) (uintptr_t) client_socket);
 }
 
 BENJI_SC_ABI result_t* server_accept_client(BENJI_SOCKET server_socket) {
