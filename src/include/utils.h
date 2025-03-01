@@ -48,7 +48,7 @@
 
         typedef unsigned long long BENJI_SOCKET;
 
-        #define BENJI_SOCKET_ERROR -1
+        #define BENJI_SOCKET_ERROR (-1)
         #define BENJI_INVALID_SOCKET (BENJI_SOCKET)(~0)
     #endif
 
@@ -57,8 +57,8 @@
         BENJI_SERVER_RUNNING
     } server_status;
 
-    #define BENJI_MAX_SOCK_CONNS 5 /* maximum number of tries to connect to a socket */
-    #define BENJI_MAX_TRIES 3 /* max attempts to try something */
+    #define BENJI_MAX_SOCK_CONNS (5) /* maximum number of tries to connect to a socket */
+    #define BENJI_MAX_TRIES (3) /* max attempts to try something */
 
     BENJI_SC_ABI result_t* create_socket();
     BENJI_SC_ABI result_t* close_socket(BENJI_SOCKET sock);
@@ -70,16 +70,16 @@
     #if defined(_WIN32)
         #include <dxgi.h>
 
-        #define BENJI_CPUID_BUFFER_LENGTH 4
-        #define BENJI_CPUID_CPU_NAME_SECTIONS_COUNT 3
-        #define BENJI_CPUID_CPU_NAME_START 0x80000002
+        #define BENJI_CPUID_BUFFER_LENGTH (4)
+        #define BENJI_CPUID_CPU_NAME_SECTIONS_COUNT (3)
+        #define BENJI_CPUID_CPU_NAME_START (0x80000002)
 
-        #define BENJI_GPU_VENDOR_INTEL 0x8086
-        #define BENJI_GPU_VENDOR_AMD 0x1002
-        #define BENJI_GPU_VENDOR_NVIDIA 0x10de
+        #define BENJI_GPU_VENDOR_INTEL (0x8086)
+        #define BENJI_GPU_VENDOR_AMD (0x1002)
+        #define BENJI_GPU_VENDOR_NVIDIA (0x10de)
 
-        #define BENJI_SMBIOS_MEMORY_DEVICE_TYPE 17
-        #define BENJI_SMBIOS_SPEED_OFFSET 0x15
+        #define BENJI_SMBIOS_MEMORY_DEVICE_TYPE (17)
+        #define BENJI_SMBIOS_SPEED_OFFSET (0x15)
 
         typedef uint32_t (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
     #elif defined(__linux__)
@@ -95,7 +95,7 @@
     result_t* get_hardware_info();
 #endif
 
-#define BENJI_BASIC_STRING_LENGTH 1024 /* good general beginning size for a string */
+#define BENJI_BASIC_STRING_LENGTH (1024) /* good general beginning size for a string */
 
 #define BENJI_CAPACITY(n, t) ((n) * sizeof(t))
 
@@ -108,7 +108,7 @@
 #ifdef NOERROR
     #define BENJI_NO_ERROR NOERROR
 #else
-    #define BENJI_NO_ERROR 0
+    #define BENJI_NO_ERROR (0)
 #endif
 
 void strtrim(char* string);
