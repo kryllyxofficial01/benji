@@ -4,48 +4,20 @@ result_t* get_ram_info() {
     ram_info_t* info = malloc(sizeof(ram_info_t));
 
     result_t* ram_total_memory_result = get_ram_total_memory();
-    if (ram_total_memory_result->is_error) {
-        return result_error(
-            ram_total_memory_result->payload.error.code,
-            ram_total_memory_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->total_memory = *(double*) result_unwrap(ram_total_memory_result);
+    return_if_error(ram_total_memory_result);
+    info->total_memory = *(double*) result_unwrap_value(ram_total_memory_result);
 
     result_t* ram_memory_load_result = get_ram_memory_load();
-    if (ram_memory_load_result->is_error) {
-        return result_error(
-            ram_memory_load_result->payload.error.code,
-            ram_memory_load_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->memory_load = *(double*) result_unwrap(ram_memory_load_result);
+    return_if_error(ram_memory_load_result);
+    info->memory_load = *(double*) result_unwrap_value(ram_memory_load_result);
 
     result_t* ram_free_memory_result = get_ram_free_memory();
-    if (ram_free_memory_result->is_error) {
-        return result_error(
-            ram_free_memory_result->payload.error.code,
-            ram_free_memory_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->free_memory = *(double*) result_unwrap(ram_free_memory_result);
+    return_if_error(ram_free_memory_result);
+    info->free_memory = *(double*) result_unwrap_value(ram_free_memory_result);
 
     result_t* ram_speed_result = get_ram_speed();
-    if (ram_speed_result->is_error) {
-        return result_error(
-            ram_speed_result->payload.error.code,
-            ram_speed_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->speed = (uint16_t) (uintptr_t) result_unwrap(ram_speed_result);
+    return_if_error(ram_speed_result);
+    info->speed = (uint16_t) (uintptr_t) result_unwrap_value(ram_speed_result);
 
     return result_success(info);
 }
@@ -53,15 +25,9 @@ result_t* get_ram_info() {
 result_t* get_ram_total_memory() {
     #if defined(_WIN32)
         result_t* status_result = get_memory_status();
-        if (status_result->is_error) {
-            return result_error(
-                status_result->payload.error.code,
-                status_result->payload.error.message,
-                BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(status_result);
 
-        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap(status_result);
+        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap_value(status_result);
 
         void* memory = malloc(sizeof(double));
 
@@ -81,15 +47,9 @@ result_t* get_ram_total_memory() {
 result_t* get_ram_memory_load() {
     #if defined(_WIN32)
         result_t* status_result = get_memory_status();
-        if (status_result->is_error) {
-            return result_error(
-                status_result->payload.error.code,
-                status_result->payload.error.message,
-                BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(status_result);
 
-        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap(status_result);
+        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap_value(status_result);
 
         result_t* total_memory_result = get_ram_total_memory();
         if (total_memory_result->is_error) {
@@ -100,7 +60,7 @@ result_t* get_ram_memory_load() {
             );
         }
 
-        double total_memory = *(double*) result_unwrap(total_memory_result);
+        double total_memory = *(double*) result_unwrap_value(total_memory_result);
         double percent = status.dwMemoryLoad / 100.0; // dwMemoryLoad returns a value between [0, 100]
 
         void* memory = malloc(sizeof(double));
@@ -121,15 +81,9 @@ result_t* get_ram_memory_load() {
 result_t* get_ram_free_memory() {
     #if defined(_WIN32)
         result_t* status_result = get_memory_status();
-        if (status_result->is_error) {
-            return result_error(
-                status_result->payload.error.code,
-                status_result->payload.error.message,
-                BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(status_result);
 
-        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap(status_result);
+        MEMORYSTATUSEX status = *(MEMORYSTATUSEX*) result_unwrap_value(status_result);
 
         void* memory = malloc(sizeof(double));
 

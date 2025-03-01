@@ -23,16 +23,14 @@ void log_info(const char* info, ...) {
     va_end(arguments);
 }
 
-void log_warning(result_t* result) {
+void log_warning(result_error_payload_t error) {
     fprintf(
-        stderr, YELLOW "%s:%d under %s() -> %s (%i)\n" COLOR_RESET,
-
-        result->payload.error.location.file_name,
-        result->payload.error.location.lineno,
-        result->payload.error.location.function_name,
-
-        result->payload.error.message,
-        result->payload.error.code
+        stderr, YELLOW "%s:%i under %s() -> %s (%i)\n" COLOR_RESET,
+        error.location.file_name,
+        error.location.lineno,
+        error.location.function_name,
+        error.message,
+        error.code
     );
 }
 
@@ -48,15 +46,13 @@ void log_warning_info(const char* info, ...) {
     va_end(arguments);
 }
 
-void log_error(result_t* result) {
+void log_error(result_error_payload_t error) {
     fprintf(
-        stderr, RED "%s:%d under %s() -> %s (%i)\n" COLOR_RESET,
-
-        result->payload.error.location.file_name,
-        result->payload.error.location.lineno,
-        result->payload.error.location.function_name,
-
-        result->payload.error.message,
-        result->payload.error.code
+        stderr, RED "%s:%i under %s() -> %s (%i)\n" COLOR_RESET,
+        error.location.file_name,
+        error.location.lineno,
+        error.location.function_name,
+        error.message,
+        error.code
     );
 }

@@ -17,7 +17,7 @@ BENJI_SC_ABI result_t* server_init() {
 
     return_if_error(server_socket_result);
 
-    BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(server_socket_result);
+    BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap_value(server_socket_result);
 
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == BENJI_SOCKET_ERROR) {
         result_t* close_server_socket_result = close_socket(server_socket);
@@ -64,14 +64,14 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         result_t* client_handle_result = server_handle_client(server_socket, &data_groups, &data_group_count);
         if (client_handle_result->is_error) {
-            log_warning(client_handle_result);
+            result_error_payload_t client_handle_result_error = result_unwrap_error(client_handle_result);
 
-            result_free(client_handle_result);
+            log_warning(client_handle_result_error);
 
             continue;
         }
 
-        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_handle_result);
+        BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap_value(client_handle_result);
 
         char* json = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
         json[0] = '\0';
@@ -81,10 +81,13 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
             result_t* close_client_socket_result = close_socket(client_socket);
             if (close_client_socket_result->is_error) {
-                log_warning(close_client_socket_result);
-            }
+                result_error_payload_t close_client_socket_result_error = result_unwrap_error(close_client_socket_result);
 
-            result_free(close_client_socket_result);
+                log_warning(close_client_socket_result_error);
+            }
+            else {
+                result_free(close_client_socket_result);
+            }
 
             continue;
         }
@@ -95,10 +98,13 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
                 result_t* close_client_socket_result = close_socket(client_socket);
                 if (close_client_socket_result->is_error) {
-                    log_warning(close_client_socket_result);
-                }
+                    result_error_payload_t close_client_socket_result_error = result_unwrap_error(close_client_socket_result);
 
-                result_free(close_client_socket_result);
+                    log_warning(close_client_socket_result_error);
+                }
+                else {
+                    result_free(close_client_socket_result);
+                }
 
                 continue;
             }
@@ -107,14 +113,14 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
             result_t* map_data_result = get_hardware_info(data_groups[i], &header);
             if (map_data_result->is_error) {
-                log_warning(map_data_result);
+                result_error_payload_t map_data_result_error = result_unwrap_error(map_data_result);
 
-                result_free(map_data_result);
+                log_warning(map_data_result_error);
 
                 continue;
             }
 
-            map_t* map_data = (map_t*) result_unwrap(map_data_result);
+            map_t* map_data = (map_t*) result_unwrap_value(map_data_result);
 
             char* json_block = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
             json_block[0] = '\0';
@@ -140,19 +146,22 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         result_t* response_result = server_send_to_client(client_socket, response);
         if (response_result->is_error) {
-            log_warning(response_result);
+            result_error_payload_t response_result_error = result_unwrap_error(response_result);
 
-            result_free(response_result);
+            log_warning(response_result_error);
 
             continue;
         }
 
         result_t* close_client_socket_result = close_socket(client_socket);
         if (close_client_socket_result->is_error) {
-            log_warning(close_client_socket_result);
-        }
+            result_error_payload_t close_client_socket_result_error = result_unwrap_error(close_client_socket_result);
 
-        result_free(close_client_socket_result);
+            log_warning(close_client_socket_result_error);
+        }
+        else {
+            result_free(close_client_socket_result);
+        }
     }
 }
 
@@ -160,12 +169,12 @@ BENJI_SC_ABI result_t* server_handle_client(BENJI_SOCKET server_socket, char*** 
     result_t* client_socket_result = server_accept_client(server_socket);
     return_if_error(client_socket_result);
 
-    BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap(client_socket_result);
+    BENJI_SOCKET client_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap_value(client_socket_result);
 
     result_t* client_data_result = server_receive_from_client(client_socket);
     return_if_error(client_data_result);
 
-    char* client_data = (char*) result_unwrap(client_data_result);
+    char* client_data = (char*) result_unwrap_value(client_data_result);
 
     *data_group_count = server_parse_client_data(client_data, data_groups);
 

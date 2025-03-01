@@ -8,8 +8,8 @@
 
 void log_debug(const char* string, ...);
 void log_info(const char* info, ...);
-void log_warning(result_t* result);
+void log_warning(result_error_payload_t error);
 void log_warning_info(const char* info, ...);
-void log_error(result_t* result);
+void log_error(result_error_payload_t error);
 
 #endif

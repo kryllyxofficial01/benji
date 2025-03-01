@@ -86,7 +86,7 @@
     #define collect_map_data(info_type, get_info, convert_to_map, map_data) \
         result_t* info_result = get_info(); \
         return_if_error(info_result); \
-        info_type cpu_info = *(info_type*) result_unwrap(info_result); \
+        info_type cpu_info = *(info_type*) result_unwrap_value(info_result); \
         map_data = convert_to_map(cpu_info);
 
     result_t* get_hardware_info();

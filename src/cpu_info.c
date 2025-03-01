@@ -4,73 +4,31 @@ result_t* get_cpu_info() {
     cpu_info_t* info = malloc(sizeof(cpu_info_t));
 
     result_t* cpu_name_result = get_cpu_name();
-    if (cpu_name_result->is_error) {
-        return result_error(
-            cpu_name_result->payload.error.code,
-            cpu_name_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->name = strdup((char*) result_unwrap(cpu_name_result));
+    return_if_error(cpu_name_result);
+    info->name = strdup((char*) result_unwrap_value(cpu_name_result));
     strtrim(info->name);
 
     result_t* cpu_vendor_result = get_cpu_vendor();
-    if (cpu_vendor_result->is_error) {
-        return result_error(
-            cpu_vendor_result->payload.error.code,
-            cpu_vendor_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->vendor = strdup((char*) result_unwrap(cpu_vendor_result));
+    return_if_error(cpu_vendor_result);
+    info->vendor = strdup((char*) result_unwrap_value(cpu_vendor_result));
     strtrim(info->vendor);
 
     result_t* cpu_arch_result = get_cpu_arch();
-    if (cpu_arch_result->is_error) {
-        return result_error(
-            cpu_arch_result->payload.error.code,
-            cpu_arch_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->arch = strdup((char*) result_unwrap(cpu_arch_result));
+    return_if_error(cpu_arch_result);
+    info->arch = strdup((char*) result_unwrap_value(cpu_arch_result));
     strtrim(info->arch);
 
     result_t* cpu_clock_speed_result = get_cpu_clock_speed();
-    if (cpu_clock_speed_result->is_error) {
-        return result_error(
-            cpu_clock_speed_result->payload.error.code,
-            cpu_clock_speed_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->clock_speed = *(double*) result_unwrap(cpu_clock_speed_result);
+    return_if_error(cpu_clock_speed_result);
+    info->clock_speed = *(double*) result_unwrap_value(cpu_clock_speed_result);
 
     result_t* cpu_core_count_result = get_cpu_core_count();
-    if (cpu_core_count_result->is_error) {
-        return result_error(
-            cpu_core_count_result->payload.error.code,
-            cpu_core_count_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->core_count = (size_t) (uintptr_t) result_unwrap(cpu_core_count_result);
+    return_if_error(cpu_core_count_result);
+    info->core_count = (size_t) (uintptr_t) result_unwrap_value(cpu_core_count_result);
 
     result_t* cpu_logical_processors_count_result = get_cpu_logical_processors_count();
-    if (cpu_logical_processors_count_result->is_error) {
-        return result_error(
-            cpu_logical_processors_count_result->payload.error.code,
-            cpu_logical_processors_count_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap(cpu_logical_processors_count_result);
+    return_if_error(cpu_logical_processors_count_result);
+    info->logical_processors_count = (size_t) (uintptr_t) result_unwrap_value(cpu_logical_processors_count_result);
 
     return result_success(info);
 }

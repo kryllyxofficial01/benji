@@ -4,61 +4,26 @@ result_t* get_gpu_info() {
     gpu_info_t* info = malloc(sizeof(gpu_info_t));
 
     result_t* gpu_name_result = get_gpu_name();
-    if (gpu_name_result->is_error) {
-        return result_error(
-            gpu_name_result->payload.error.code,
-            gpu_name_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->name = strdup((char*) result_unwrap(gpu_name_result));
+    return_if_error(gpu_name_result);
+    info->name = strdup((char*) result_unwrap_value(gpu_name_result));
     strtrim(info->name);
 
     result_t* gpu_vendor_result = get_gpu_vendor();
-    if (gpu_vendor_result->is_error) {
-        return result_error(
-            gpu_vendor_result->payload.error.code,
-            gpu_vendor_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->vendor = strdup((char*) result_unwrap(gpu_vendor_result));
+    return_if_error(gpu_vendor_result);
+    info->vendor = strdup((char*) result_unwrap_value(gpu_vendor_result));
     strtrim(info->vendor);
 
     result_t* gpu_dedicated_video_memory_result = get_gpu_dedicated_video_memory();
-    if (gpu_dedicated_video_memory_result->is_error) {
-        return result_error(
-            gpu_dedicated_video_memory_result->payload.error.code,
-            gpu_dedicated_video_memory_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->dedicated_video_memory = *(double*) result_unwrap(gpu_dedicated_video_memory_result);
+    return_if_error(gpu_dedicated_video_memory_result);
+    info->dedicated_video_memory = *(double*) result_unwrap_value(gpu_dedicated_video_memory_result);
 
     result_t* gpu_dedicated_system_memory_result = get_gpu_dedicated_system_memory();
-    if (gpu_dedicated_system_memory_result->is_error) {
-        return result_error(
-            gpu_dedicated_system_memory_result->payload.error.code,
-            gpu_dedicated_system_memory_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->dedicated_system_memory = *(double*) result_unwrap(gpu_dedicated_system_memory_result);
+    return_if_error(gpu_dedicated_system_memory_result);
+    info->dedicated_system_memory = *(double*) result_unwrap_value(gpu_dedicated_system_memory_result);
 
     result_t* gpu_shared_system_memory_result = get_gpu_shared_system_memory();
-    if (gpu_shared_system_memory_result->is_error) {
-        return result_error(
-            gpu_shared_system_memory_result->payload.error.code,
-            gpu_shared_system_memory_result->payload.error.message,
-            BENJI_ERROR_PACKET
-        );
-    }
-
-    info->shared_system_memory = *(double*) result_unwrap(gpu_shared_system_memory_result);
+    return_if_error(gpu_shared_system_memory_result);
+    info->shared_system_memory = *(double*) result_unwrap_value(gpu_shared_system_memory_result);
 
     return result_success(info);
 }
@@ -93,15 +58,9 @@ result_t* get_gpu_vendor() {
         char* vendor;
 
         result_t* description_result = get_gpu_description();
-        if (description_result->is_error) {
-            return result_error(
-                description_result->payload.error.code,
-                description_result->payload.error.message,
-                BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(description_result);
 
-        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap_value(description_result);
 
         switch (description.VendorId) {
             case BENJI_GPU_VENDOR_INTEL: vendor = "Intel"; break;
@@ -120,15 +79,9 @@ result_t* get_gpu_vendor() {
 result_t* get_gpu_dedicated_video_memory() {
     #if defined(_WIN32)
         result_t* description_result = get_gpu_description();
-        if (description_result->is_error) {
-            return result_error(
-                description_result->payload.error.code,
-                description_result->payload.error.message,
-            BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(description_result);
 
-        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap_value(description_result);
 
         void* memory = malloc(sizeof(double));
 
@@ -148,15 +101,9 @@ result_t* get_gpu_dedicated_video_memory() {
 result_t* get_gpu_dedicated_system_memory() {
     #if defined(_WIN32)
         result_t* description_result = get_gpu_description();
-        if (description_result->is_error) {
-            return result_error(
-                description_result->payload.error.code,
-                description_result->payload.error.message,
-                BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(description_result);
 
-        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap_value(description_result);
 
         void* memory = malloc(sizeof(double));
 
@@ -176,15 +123,9 @@ result_t* get_gpu_dedicated_system_memory() {
 result_t* get_gpu_shared_system_memory() {
     #if defined(_WIN32)
         result_t* description_result = get_gpu_description();
-        if (description_result->is_error) {
-            return result_error(
-                description_result->payload.error.code,
-                description_result->payload.error.message,
-                BENJI_ERROR_PACKET
-            );
-        }
+        return_if_error(description_result);
 
-        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap(description_result);
+        DXGI_ADAPTER_DESC description = *(DXGI_ADAPTER_DESC*) result_unwrap_value(description_result);
 
         void* memory = malloc(sizeof(double));
 
