@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+typedef struct _BENJI_ERROR_PACKET {
+    const char* file_name;
+    const char* function_name;
+    unsigned long lineno;
+} error_packet_t;
+
 typedef struct _BENJI_RESULT {
     bool is_error;
 
@@ -12,23 +18,27 @@ typedef struct _BENJI_RESULT {
 
         struct _RESULT_PAYLOAD_ERROR {
             int code;
-            const char* error_message;
+            const char* message;
+
+            error_packet_t location;
         } error;
     } payload;
 } result_t;
 
-#define return_if_error(result) \
-    if (result->is_error) { \
-        return result_error( \
-            result->payload.error.code, \
-            result->payload.error.error_message \
-        ); \
-    }
+#define BENJI_ERROR_PACKET (struct _BENJI_ERROR_PACKET) { .file_name = __FILE__, .function_name = __func__, .lineno = __LINE__ }
+
+#define return_if_error(result) if (result->is_error) { \
+    return result_error( \
+        result->payload.error.code, \
+        result->payload.error.message, \
+        BENJI_ERROR_PACKET \
+    ); \
+}
 
 result_t* result_init();
 
 result_t* result_success(void* value);
-result_t* result_error(int error_code, const char* error_message);
+result_t* result_error(int error_code, const char* message, error_packet_t location);
 
 void* result_unwrap(result_t* result);
 

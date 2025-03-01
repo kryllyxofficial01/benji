@@ -17,13 +17,14 @@ result_t* result_success(void* value) {
     return result;
 }
 
-result_t* result_error(int error_code, const char* error_message) {
+result_t* result_error(int error_code, const char* message, error_packet_t location) {
     result_t* result = result_init();
 
     result->is_error = true;
 
     result->payload.error.code = error_code;
-    result->payload.error.error_message = error_message;
+    result->payload.error.message = message;
+    result->payload.error.location = location;
 
     return result;
 }

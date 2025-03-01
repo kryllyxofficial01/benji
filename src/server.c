@@ -30,7 +30,7 @@ BENJI_SC_ABI result_t* server_init() {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "Failed to bind server socket to server address");
+        return result_error(error_code, "Failed to bind server socket to server address", BENJI_ERROR_PACKET);
     }
 
     if (listen(server_socket, BENJI_MAX_SOCK_CONNS) == BENJI_SOCKET_ERROR) {
@@ -44,7 +44,7 @@ BENJI_SC_ABI result_t* server_init() {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "Failed to put server socket into listening mode");
+        return result_error(error_code, "Failed to put server socket into listening mode", BENJI_ERROR_PACKET);
     }
 
     socklen_t server_address_length = sizeof(server_address);
@@ -182,7 +182,7 @@ BENJI_SC_ABI result_t* server_accept_client(BENJI_SOCKET server_socket) {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "accept() failed");
+        return result_error(error_code, "accept() failed", BENJI_ERROR_PACKET);
     }
 
     #if defined(_WIN32)
@@ -234,7 +234,7 @@ BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
                     int error_code = -1;
                 #endif
 
-                return result_error(error_code, "recv() failed");
+                return result_error(error_code, "recv() failed", BENJI_ERROR_PACKET);
             }
         }
 
@@ -244,7 +244,7 @@ BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
         if (data == NULL) {
             free(data);
 
-            return result_error(-1, "realloc() failed");
+            return result_error(-1, "realloc() failed", BENJI_ERROR_PACKET);
         }
 
         memcpy(data + data_size, buffer, bytes_received + 1);
@@ -265,7 +265,7 @@ BENJI_SC_ABI result_t* server_send_to_client(BENJI_SOCKET client_socket, const c
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "send() failed");
+        return result_error(error_code, "send() failed", BENJI_ERROR_PACKET);
     }
 
     return result_success((void*) (uintptr_t) bytes_sent);

@@ -7,7 +7,8 @@ result_t* get_cpu_info() {
     if (cpu_name_result->is_error) {
         return result_error(
             cpu_name_result->payload.error.code,
-            cpu_name_result->payload.error.error_message
+            cpu_name_result->payload.error.message,
+            BENJI_ERROR_PACKET
         );
     }
 
@@ -18,7 +19,8 @@ result_t* get_cpu_info() {
     if (cpu_vendor_result->is_error) {
         return result_error(
             cpu_vendor_result->payload.error.code,
-            cpu_vendor_result->payload.error.error_message
+            cpu_vendor_result->payload.error.message,
+            BENJI_ERROR_PACKET
         );
     }
 
@@ -29,7 +31,8 @@ result_t* get_cpu_info() {
     if (cpu_arch_result->is_error) {
         return result_error(
             cpu_arch_result->payload.error.code,
-            cpu_arch_result->payload.error.error_message
+            cpu_arch_result->payload.error.message,
+            BENJI_ERROR_PACKET
         );
     }
 
@@ -40,7 +43,8 @@ result_t* get_cpu_info() {
     if (cpu_clock_speed_result->is_error) {
         return result_error(
             cpu_clock_speed_result->payload.error.code,
-            cpu_clock_speed_result->payload.error.error_message
+            cpu_clock_speed_result->payload.error.message,
+            BENJI_ERROR_PACKET
         );
     }
 
@@ -50,7 +54,8 @@ result_t* get_cpu_info() {
     if (cpu_core_count_result->is_error) {
         return result_error(
             cpu_core_count_result->payload.error.code,
-            cpu_core_count_result->payload.error.error_message
+            cpu_core_count_result->payload.error.message,
+            BENJI_ERROR_PACKET
         );
     }
 
@@ -60,7 +65,8 @@ result_t* get_cpu_info() {
     if (cpu_logical_processors_count_result->is_error) {
         return result_error(
             cpu_logical_processors_count_result->payload.error.code,
-            cpu_logical_processors_count_result->payload.error.error_message
+            cpu_logical_processors_count_result->payload.error.message,
+            BENJI_ERROR_PACKET
         );
     }
 
@@ -79,7 +85,7 @@ result_t* get_cpu_name() {
             cpu_name[0] = '\0';
         }
         else {
-            return result_error(-1, "malloc() failed");
+            return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
         }
 
         for (int i = 0; i < BENJI_CPUID_CPU_NAME_SECTIONS_COUNT; ++i) {
@@ -103,7 +109,7 @@ result_t* get_cpu_vendor() {
             cpu_vendor[0] = '\0';
         }
         else {
-            return result_error(-1, "malloc() failed");
+            return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
         }
 
         __cpuid(cpu_info, 0);
@@ -156,7 +162,7 @@ result_t* get_cpu_clock_speed() {
         );
 
         if (result != BENJI_NO_ERROR) {
-            return result_error(result, "RegOpenKeyEx() failed");
+            return result_error(result, "RegOpenKeyEx() failed", BENJI_ERROR_PACKET);
         }
 
         uint32_t speed = 0;
@@ -170,7 +176,7 @@ result_t* get_cpu_clock_speed() {
             result = RegCloseKey(hkey);
 
             if (result != BENJI_NO_ERROR) {
-                return result_error(result, "RegCloseKey() failed");
+                return result_error(result, "RegCloseKey() failed", BENJI_ERROR_PACKET);
             }
 
             void* speed_ghz = malloc(sizeof(double));
@@ -180,7 +186,7 @@ result_t* get_cpu_clock_speed() {
             return result_success(speed_ghz);
         }
         else {
-            return result_error(result, "RegQueryValueEx() failed");
+            return result_error(result, "RegQueryValueEx() failed", BENJI_ERROR_PACKET);
         }
     #elif defined(__linux__)
         /* TODO: add linux stuff */
@@ -212,13 +218,13 @@ result_t* get_cpu_logical_processors_count() {
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*) malloc(length);
 
         if (!buffer) {
-            return result_error(-1, "malloc() failed");
+            return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
         }
 
         if (!GetLogicalProcessorInformation(buffer, &length)) {
             free(buffer);
 
-            return result_error(-1, "GetLogicalProcessorInformation() failed");
+            return result_error(-1, "GetLogicalProcessorInformation() failed", BENJI_ERROR_PACKET);
         }
 
         uint32_t result = 0;

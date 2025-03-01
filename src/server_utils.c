@@ -28,7 +28,7 @@ BENJI_SC_ABI result_t* create_socket() {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "Failed to create socket");
+        return result_error(error_code, "Failed to create socket", BENJI_ERROR_PACKET);
     }
 
     return result_success((void*) (uintptr_t) sock);
@@ -48,7 +48,7 @@ BENJI_SC_ABI result_t* close_socket(BENJI_SOCKET sock) {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "Failed to close socket");
+        return result_error(error_code, "Failed to close socket", BENJI_ERROR_PACKET);
     }
 
     return result_success(NULL);

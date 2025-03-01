@@ -1,3 +1,5 @@
+#define BENJI_ENABLE_LOGGING
+
 #include "include/server.h"
 
 int main(int argc, const char* argv[]) {
@@ -7,11 +9,7 @@ int main(int argc, const char* argv[]) {
 
     result_t* server_socket_result = server_init();
     if (server_socket_result->is_error) {
-        printf(
-            "A fatal error with code %i occured during creation of the server: %s",
-            server_socket_result->payload.error.code,
-            server_socket_result->payload.error.error_message
-        );
+        log_error(server_socket_result);
 
         result_free(server_socket_result);
 
@@ -22,21 +20,17 @@ int main(int argc, const char* argv[]) {
 
     result_t* server_status_result = server_run(server_socket);
     if (server_status_result->is_error) {
-        printf(
-            "A fatal error with code %i occured while running the server: %s",
-            server_status_result->payload.error.code,
-            server_status_result->payload.error.error_message
-        );
+        log_error(server_status_result);
 
         result_free(server_status_result);
 
         result_t* close_server_socket_result = close_socket(server_socket);
         if (close_server_socket_result->is_error) {
-            int error_code = close_server_socket_result->payload.error.code;
+            log_error(close_server_socket_result);
 
             result_free(close_server_socket_result);
 
-            terminate(error_code);
+            terminate(close_server_socket_result->payload.error.code);
         }
 
         result_free(close_server_socket_result);
@@ -46,11 +40,11 @@ int main(int argc, const char* argv[]) {
 
     result_t* close_server_socket_result = close_socket(server_socket);
     if (close_server_socket_result->is_error) {
-        int error_code = close_server_socket_result->payload.error.code;
+        log_error(close_server_socket_result);
 
         result_free(close_server_socket_result);
 
-        terminate(error_code);
+        terminate(close_server_socket_result->payload.error.code);
     }
 
     result_free(close_server_socket_result);
