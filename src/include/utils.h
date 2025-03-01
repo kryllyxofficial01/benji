@@ -9,11 +9,8 @@
 #include <ctype.h>
 
 #include "result.h"
+#include "logger.h"
 #include "map.h"
-
-#ifdef BENJI_ENABLE_LOGGING
-    #include "logger.h"
-#endif
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN /* compact Win32 to only common utilities */

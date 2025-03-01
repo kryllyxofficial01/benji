@@ -50,7 +50,7 @@ BENJI_SC_ABI result_t* server_init() {
     socklen_t server_address_length = sizeof(server_address);
     getsockname(server_socket, (struct sockaddr*) &server_address, &server_address_length);
 
-    printf("Server created at '127.0.0.1:%d'\n", ntohs(server_address.sin_port));
+    log_info("Server created at '127.0.0.1:%d'", ntohs(server_address.sin_port));
 
     server_status = BENJI_SERVER_RUNNING;
 
@@ -64,7 +64,9 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         result_t* client_handle_result = server_handle_client(server_socket, &data_groups, &data_group_count);
         if (client_handle_result->is_error) {
-            // TODO: error logging
+            log_warning(client_handle_result);
+
+            result_free(client_handle_result);
 
             continue;
         }
@@ -75,9 +77,11 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
         json[0] = '\0';
 
         if (data_groups == NULL || data_group_count <= 0) {
+            log_warning_info("Client data is either empty or incorrectly formatted, closing client connection...");
+
             result_t* close_client_socket_result = close_socket(client_socket);
             if (close_client_socket_result->is_error) {
-                // TODO: error logging
+                log_warning(close_client_socket_result);
             }
 
             result_free(close_client_socket_result);
@@ -87,9 +91,11 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         for (size_t i = 0; i < data_group_count; i++) {
             if (data_groups[i] == NULL) {
+                log_warning_info("Invalid data group, closing client connection...");
+
                 result_t* close_client_socket_result = close_socket(client_socket);
                 if (close_client_socket_result->is_error) {
-                    // TODO: error logging
+                    log_warning(close_client_socket_result);
                 }
 
                 result_free(close_client_socket_result);
@@ -101,7 +107,7 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
             result_t* map_data_result = get_hardware_info(data_groups[i], &header);
             if (map_data_result->is_error) {
-                // TODO: error logging
+                log_warning(map_data_result);
 
                 result_free(map_data_result);
 
@@ -134,16 +140,16 @@ BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket) {
 
         result_t* response_result = server_send_to_client(client_socket, response);
         if (response_result->is_error) {
-            result_free(response_result);
+            log_warning(response_result);
 
-            // TODO: error logging
+            result_free(response_result);
 
             continue;
         }
 
         result_t* close_client_socket_result = close_socket(client_socket);
         if (close_client_socket_result->is_error) {
-            // TODO: error logging
+            log_warning(close_client_socket_result);
         }
 
         result_free(close_client_socket_result);

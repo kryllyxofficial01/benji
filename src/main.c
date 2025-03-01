@@ -1,5 +1,3 @@
-#define BENJI_ENABLE_LOGGING
-
 #include "include/server.h"
 
 int main(int argc, const char* argv[]) {
