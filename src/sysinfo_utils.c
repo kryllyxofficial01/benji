@@ -17,7 +17,7 @@ result_t* get_hardware_info(const char* hardware_group, char** header) {
         *header = "gpu_info";
     }
     else if (strcmp(hardware_group, "ram_all") == 0) {
-        collect_map_data(gpu_info_t, get_gpu_info, gpu_info_to_map, map_data);
+        collect_map_data(ram_info_t, get_ram_info, ram_info_to_map, map_data);
 
         *header = "ram_info";
     }
