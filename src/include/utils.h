@@ -97,7 +97,7 @@
         #define BENJI_MAX_TRIES (3) /* max attempts to try something */
     #endif
 
-    static enum BENJISERVERSTATUS {
+    static enum _BENJI_SERVER_STATUS {
         BENJI_SERVER_STOPPED,
         BENJI_SERVER_RUNNING
     } server_status;
