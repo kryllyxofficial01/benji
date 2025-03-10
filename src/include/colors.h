@@ -3,15 +3,40 @@
 
 /* ANSI COLOR CODES */
 
-#define BLACK "\e[30m"
-#define RED "\e[31m"
-#define GREEN "\e[32m"
-#define YELLOW "\e[33m"
-#define BLUE "\e[34m"
-#define MAGENTA "\e[35m"
-#define CYAN "\e[36m"
-#define WHITE "\e[37m"
+#ifndef ANSI_BLACK
+    #define ANSI_BLACK "\e[30m"
+#endif
 
-#define COLOR_RESET "\e[0m"
+#ifndef ANSI_RED
+    #define ANSI_RED "\e[31m"
+#endif
+
+#ifndef ANSI_GREEN
+    #define ANSI_GREEN "\e[32m"
+#endif
+
+#ifndef ANSI_YELLOW
+    #define ANSI_YELLOW "\e[33m"
+#endif
+
+#ifndef ANSI_BLUE
+    #define ANSI_BLUE "\e[34m"
+#endif
+
+#ifndef ANSI_MAGENTA
+    #define ANSI_MAGENTA "\e[35m"
+#endif
+
+#ifndef ANSI_CYAN
+    #define ANSI_CYAN "\e[36m"
+#endif
+
+#ifndef ANSI_WHITE
+    #define ANSI_WHITE "\e[37m"
+#endif
+
+#ifndef ANSI_COLOR_RESET
+    #define ANSI_COLOR_RESET "\e[0m"
+#endif
 
 #endif

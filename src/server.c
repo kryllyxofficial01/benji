@@ -13,16 +13,22 @@ BENJI_SC_ABI result_t* server_init() {
 
     server_status = BENJI_SERVER_STOPPED;
 
+    log_debug("\nCreating server socket...");
+
     result_t* server_socket_result = create_socket();
 
     return_if_error(server_socket_result);
 
     BENJI_SOCKET server_socket = (BENJI_SOCKET) (uintptr_t) result_unwrap_value(server_socket_result);
 
+    log_debug("Server socket created successfully");
+
+    log_debug("\nBinding server socket to server address...");
+
     if (bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == BENJI_SOCKET_ERROR) {
         result_t* close_server_socket_result = close_socket(server_socket);
 
-        return_if_error(close_server_socket_result);
+        return_if_error_with_warning(close_server_socket_result);
 
         #if defined(_WIN32)
             int error_code = WSAGetLastError();
@@ -33,10 +39,14 @@ BENJI_SC_ABI result_t* server_init() {
         return result_error(error_code, "Failed to bind server socket to server address", BENJI_ERROR_PACKET);
     }
 
+    log_debug("Server socket binded successfully");
+
+    log_debug("\nPutting server socket into listening mode...");
+
     if (listen(server_socket, BENJI_MAX_SOCK_CONNS) == BENJI_SOCKET_ERROR) {
         result_t* close_server_socket_result = close_socket(server_socket);
 
-        return_if_error(close_server_socket_result);
+        return_if_error_with_warning(close_server_socket_result);
 
         #if defined(_WIN32)
             int error_code = WSAGetLastError();
@@ -47,10 +57,12 @@ BENJI_SC_ABI result_t* server_init() {
         return result_error(error_code, "Failed to put server socket into listening mode", BENJI_ERROR_PACKET);
     }
 
+    log_debug("Server socket put into listening mode succesfully");
+
     socklen_t server_address_length = sizeof(server_address);
     getsockname(server_socket, (struct sockaddr*) &server_address, &server_address_length);
 
-    log_info("Server created at '127.0.0.1:%d'", ntohs(server_address.sin_port));
+    log_info("\nServer created at '127.0.0.1:%d'", ntohs(server_address.sin_port));
 
     server_status = BENJI_SERVER_RUNNING;
 
@@ -234,7 +246,7 @@ BENJI_SC_ABI result_t* server_receive_from_client(BENJI_SOCKET client_socket) {
                 if (tries < BENJI_MAX_TRIES) {
                     tries++;
 
-                    SLEEP(50); // wait 50ms and try again
+                    BENJI_SLEEP(50); // wait 50ms and try again
 
                     continue; // no data is available, just try again
                 }

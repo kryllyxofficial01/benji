@@ -1,4 +1,6 @@
-#define BENJI_USE_SYS_INFO_UTILS
+#ifndef BENJI_USE_SYS_INFO_UTILS
+    #define BENJI_USE_SYS_INFO_UTILS
+#endif
 
 #include "include/hardware.h"
 #include "include/utils.h"

@@ -1,4 +1,6 @@
 #include "include/server.h"
+#include "include/logger.h"
+#include "include/result.h"
 
 int main(int argc, const char* argv[]) {
     #ifdef _WIN32

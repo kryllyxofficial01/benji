@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #include "utils.h"
+#include "result.h"
 #include "colors.h"
 
 void log_debug(const char* string, ...);

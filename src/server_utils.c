@@ -1,20 +1,31 @@
-#define BENJI_USE_SERVER_UTILS
+#ifndef BENJI_USE_SERVER_UTILS
+    #define BENJI_USE_SERVER_UTILS
+#endif
 
 #include "include/utils.h"
+#include "include/logger.h"
 
 #ifdef _WIN32
     BENJI_SC_ABI void winsock_init() {
         struct WSAData wsa_data;
 
+        log_debug("Initializing Winsock...");
+
         if (WSAStartup(WINSOCK_VERSION, &wsa_data) != BENJI_NO_ERROR) {
             terminate(WSAGetLastError());
         }
+
+        log_debug("Winsock initialized successfully");
     }
 
     BENJI_SC_ABI void winsock_cleanup() {
+        log_debug("\nCleaning up Winsock...");
+
         if (WSACleanup() == BENJI_SOCKET_ERROR) {
             exit(WSAGetLastError());
         }
+
+        log_debug("Winsock cleaned up successfully");
     }
 #endif
 

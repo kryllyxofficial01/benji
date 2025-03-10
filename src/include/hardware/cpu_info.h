@@ -1,13 +1,28 @@
 #ifndef __BENJI_CPU_INFO_H
 #define __BENJI_CPU_INFO_H
 
-#define BENJI_USE_SYS_INFO_UTILS
+#ifndef BENJI_USE_SYS_INFO_UTILS
+    #define BENJI_USE_SYS_INFO_UTILS
+#endif
 
 #include "../utils.h"
+#include "../map.h"
 
 #if defined(_WIN32)
     #include <intrin.h>
     #include <unistd.h>
+#endif
+
+#ifndef BENJI_CPUID_BUFFER_LENGTH
+    #define BENJI_CPUID_BUFFER_LENGTH (4)
+#endif
+
+#ifndef BENJI_CPUID_CPU_NAME_SECTIONS_COUNT
+    #define BENJI_CPUID_CPU_NAME_SECTIONS_COUNT (3)
+#endif
+
+#ifndef BENJI_CPUID_CPU_NAME_START
+    #define BENJI_CPUID_CPU_NAME_START (0x80000002)
 #endif
 
 typedef struct _BENJI_CPU_INFO {
@@ -19,6 +34,8 @@ typedef struct _BENJI_CPU_INFO {
     size_t logical_processors_count;
     // double current_temp; // TBD until i figure out how
 } cpu_info_t;
+
+typedef uint32_t (*processor_info_callback_t)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*);
 
 result_t* get_cpu_info();
 
