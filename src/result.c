@@ -17,23 +17,32 @@ result_t* result_success(void* value) {
     return result;
 }
 
-result_t* result_error(int error_code, const char* error_message) {
+result_t* result_error(int error_code, const char* message, error_packet_t location) {
     result_t* result = result_init();
 
     result->is_error = true;
 
     result->payload.error.code = error_code;
-    result->payload.error.error_message = error_message;
+    result->payload.error.message = message;
+    result->payload.error.location = location;
 
     return result;
 }
 
-void* result_unwrap(result_t* result) {
+void* result_unwrap_value(result_t* result) {
     void* value = result->payload.value;
 
     result_free(result);
 
     return value;
+}
+
+result_error_payload_t result_unwrap_error(result_t* result) {
+    result_error_payload_t error = result->payload.error;
+
+    result_free(result);
+
+    return error;
 }
 
 void result_free(result_t* result) {

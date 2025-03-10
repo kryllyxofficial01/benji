@@ -1,9 +1,19 @@
 #ifndef __BENJI_RAM_INFO_H
 #define __BENJI_RAM_INFO_H
 
-#define BENJI_USE_SYS_INFO_UTILS
+#ifndef BENJI_USE_SYS_INFO_UTILS
+    #define BENJI_USE_SYS_INFO_UTILS
+#endif
 
 #include "../utils.h"
+
+#ifndef BENJI_SMBIOS_MEMORY_DEVICE_TYPE
+    #define BENJI_SMBIOS_MEMORY_DEVICE_TYPE (17)
+#endif
+
+#ifndef BENJI_SMBIOS_SPEED_OFFSET
+    #define BENJI_SMBIOS_SPEED_OFFSET (0x15)
+#endif
 
 typedef struct _BENJI_RAM_INFO {
     double total_memory; // in GB

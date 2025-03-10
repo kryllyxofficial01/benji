@@ -1,20 +1,31 @@
-#define BENJI_USE_SERVER_UTILS
+#ifndef BENJI_USE_SERVER_UTILS
+    #define BENJI_USE_SERVER_UTILS
+#endif
 
 #include "include/utils.h"
+#include "include/logger.h"
 
 #ifdef _WIN32
     BENJI_SC_ABI void winsock_init() {
         struct WSAData wsa_data;
 
+        log_debug("Initializing Winsock...");
+
         if (WSAStartup(WINSOCK_VERSION, &wsa_data) != BENJI_NO_ERROR) {
             terminate(WSAGetLastError());
         }
+
+        log_debug("Winsock initialized successfully");
     }
 
     BENJI_SC_ABI void winsock_cleanup() {
+        log_debug("\nCleaning up Winsock...");
+
         if (WSACleanup() == BENJI_SOCKET_ERROR) {
             exit(WSAGetLastError());
         }
+
+        log_debug("Winsock cleaned up successfully");
     }
 #endif
 
@@ -28,7 +39,7 @@ BENJI_SC_ABI result_t* create_socket() {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "Failed to create socket");
+        return result_error(error_code, "Failed to create socket", BENJI_ERROR_PACKET);
     }
 
     return result_success((void*) (uintptr_t) sock);
@@ -48,7 +59,7 @@ BENJI_SC_ABI result_t* close_socket(BENJI_SOCKET sock) {
             int error_code = -1;
         #endif
 
-        return result_error(error_code, "Failed to close socket");
+        return result_error(error_code, "Failed to close socket", BENJI_ERROR_PACKET);
     }
 
     return result_success(NULL);

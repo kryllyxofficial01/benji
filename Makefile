@@ -1,7 +1,12 @@
 GXX = gcc
 
 GXX_FLAGS = -g
-LINKED_LIBS = -lWs2_32 -ldxgi -ldxguid -lole32
+
+ifeq ($(OS), Windows_NT)
+	LINKED_LIBS = -lWs2_32 -ldxgi -ldxguid -lole32
+else ifeq ($(shell uname), Linux)
+	LINKED_LIBS =
+endif
 
 BUILD = build
 OBJ = $(BUILD)/obj
@@ -15,11 +20,7 @@ all: clean compile
 compile: $(BUILD)/$(EXEC)
 
 $(BUILD)/$(EXEC): $(OBJS)
-ifeq ($(OS), Windows_NT)
 	$(GXX) $(OBJS) -o $@ $(LINKED_LIBS)
-else ifeq ($(shell uname), Linux)
-	$(GXX) $(OBJS) -o $@
-endif
 
 $(OBJ)/%.o: src/%.c
 	$(GXX) $(GXX_FLAGS) -c $< -o $@

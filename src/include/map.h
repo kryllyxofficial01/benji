@@ -3,9 +3,13 @@
 
 #include "utils.h"
 
-#define BENJI_MAP_INITIAL_CAPACITY 2 /* number of elements (keys + values) to allocate memory for at initiation */
+#ifndef BENJI_MAP_INITIAL_CAPACITY
+    #define BENJI_MAP_INITIAL_CAPACITY (2) /* number of elements (keys + values) to allocate memory for at initiation */
+#endif
 
-#define BENJI_MAP_KEY_NOT_FOUND -1
+#ifndef BENJI_MAP_KEY_NOT_FOUND
+    #define BENJI_MAP_KEY_NOT_FOUND (-1)
+#endif
 
 typedef struct _BENJI_MAP {
     char** keys;

@@ -1,11 +1,17 @@
 #ifndef __BENJI_SERVER_H
 #define __BENJI_SERVER_H
 
-#define BENJI_USE_SERVER_UTILS
+#ifndef BENJI_USE_SERVER_UTILS
+    #define BENJI_USE_SERVER_UTILS
+#endif
 
-#include "hardware.h"
+#ifndef BENJI_USE_SYS_INFO_UTILS
+    #define BENJI_USE_SYS_INFO_UTILS
+#endif
 
 #include "utils.h"
+#include "hardware.h"
+#include "logger.h"
 
 BENJI_SC_ABI result_t* server_init();
 BENJI_SC_ABI result_t* server_run(BENJI_SOCKET server_socket);
