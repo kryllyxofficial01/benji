@@ -39,6 +39,6 @@ result_t* get_gpu_shared_system_memory();
     result_t* get_gpu_description();
 #endif
 
-map_t* gpu_info_to_map(gpu_info_t gpu_info);
+result_t* gpu_info_to_map(gpu_info_t gpu_info);
 
 #endif

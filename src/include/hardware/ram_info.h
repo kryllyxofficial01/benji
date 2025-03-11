@@ -67,6 +67,6 @@ result_t* get_ram_speed();
     result_t* get_memory_status();
 #endif
 
-map_t* ram_info_to_map(ram_info_t ram_info);
+result_t* ram_info_to_map(ram_info_t ram_info);
 
 #endif

@@ -123,7 +123,9 @@
             result_t* info_result = get_info(); \
             return_if_error(info_result); \
             info_type cpu_info = *(info_type*) result_unwrap_value(info_result); \
-            map_data = convert_to_map(cpu_info);
+            result_t* map_data_result = convert_to_map(cpu_info); \
+            return_if_error(map_data_result); \
+            map_data = (map_t*) result_unwrap(map_data_result);
     #endif
 
     result_t* get_hardware_info();

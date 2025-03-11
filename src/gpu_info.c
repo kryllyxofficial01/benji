@@ -211,10 +211,15 @@ result_t* get_gpu_shared_system_memory() {
     }
 #endif
 
-map_t* gpu_info_to_map(gpu_info_t gpu_info) {
+result_t* gpu_info_to_map(gpu_info_t gpu_info) {
     map_t* gpu_info_map = map_init();
 
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+
+    if (!buffer) {
+        return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
+    }
+
     buffer[0] = '\0';
 
     map_insert(gpu_info_map, "name", gpu_info.name);

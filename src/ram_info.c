@@ -178,6 +178,11 @@ map_t* ram_info_to_map(ram_info_t ram_info) {
     map_t* ram_info_map = map_init();
 
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+
+    if (!buffer) {
+        return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
+    }
+
     buffer[0] = '\0';
 
     sprintf(buffer, "%0.3f", ram_info.total_memory);

@@ -39,12 +39,11 @@ result_t* get_cpu_name() {
 
         char* cpu_name = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
-        if (cpu_name) {
-            cpu_name[0] = '\0';
-        }
-        else {
+        if (!cpu_name) {
             return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
         }
+
+        cpu_name[0] = '\0';
 
         for (int i = 0; i < BENJI_CPUID_CPU_NAME_SECTIONS_COUNT; ++i) {
             __cpuid(cpuid_info, BENJI_CPUID_CPU_NAME_START + i);
@@ -63,12 +62,11 @@ result_t* get_cpu_vendor() {
 
         char* cpu_vendor = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
 
-        if (cpu_vendor) {
-            cpu_vendor[0] = '\0';
-        }
-        else {
+        if (!cpu_vendor) {
             return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
         }
+
+        cpu_vendor[0] = '\0';
 
         __cpuid(cpu_info, 0);
 
@@ -208,10 +206,15 @@ result_t* get_cpu_logical_processors_count() {
     }
 #endif
 
-map_t* cpu_info_to_map(cpu_info_t cpu_info) {
+result_t* cpu_info_to_map(cpu_info_t cpu_info) {
     map_t* cpu_info_map = map_init();
 
     char* buffer = malloc(BENJI_CAPACITY(BENJI_BASIC_STRING_LENGTH, char));
+
+    if (!buffer) {
+        return result_error(-1, "malloc() failed", BENJI_ERROR_PACKET);
+    }
+
     buffer[0] = '\0';
 
     map_insert(cpu_info_map, "name", cpu_info.name);
@@ -229,5 +232,5 @@ map_t* cpu_info_to_map(cpu_info_t cpu_info) {
 
     free(buffer);
 
-    return cpu_info_map;
+    return result_success(cpu_info_map);
 }

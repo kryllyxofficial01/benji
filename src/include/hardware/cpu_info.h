@@ -52,6 +52,6 @@ result_t* get_cpu_logical_processors_count();
     uint32_t count_cpu_logical_processors(SYSTEM_LOGICAL_PROCESSOR_INFORMATION* info);
 #endif
 
-map_t* cpu_info_to_map(cpu_info_t cpu_info);
+result_t* cpu_info_to_map(cpu_info_t cpu_info);
 
 #endif

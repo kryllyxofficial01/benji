@@ -30,7 +30,8 @@ void log_info(const char* info, ...) {
 
 void log_warning(result_error_payload_t error) {
     fprintf(
-        stderr, ANSI_YELLOW "%s:%i under %s() -> %s (%i)\n" ANSI_COLOR_RESET,
+        stderr,
+        ANSI_YELLOW "%s:%i under %s() -> %s (%i)\n" ANSI_COLOR_RESET,
         error.location.file_name,
         error.location.lineno,
         error.location.function_name,
@@ -53,7 +54,8 @@ void log_warning_info(const char* info, ...) {
 
 void log_error(result_error_payload_t error) {
     fprintf(
-        stderr, ANSI_RED "%s:%i under %s() -> %s (%i)\n" ANSI_COLOR_RESET,
+        stderr,
+        ANSI_RED "[FATAL] %s:%i under %s() -> %s (%i)\n" ANSI_COLOR_RESET,
         error.location.file_name,
         error.location.lineno,
         error.location.function_name,
