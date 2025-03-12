@@ -113,7 +113,7 @@ result_t* get_cpu_clock_speed() {
 
         LONG result = RegOpenKeyEx(
             HKEY_LOCAL_MACHINE,
-            "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+            TEXT("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"),
             0, KEY_READ, &hkey
         );
 
@@ -125,7 +125,7 @@ result_t* get_cpu_clock_speed() {
         unsigned long int data_type, data_size = sizeof(speed);
 
         result = RegQueryValueEx(
-            hkey, "~MHz", NULL, &data_type, (LPBYTE) &speed, &data_size
+            hkey, TEXT("~MHz"), NULL, &data_type, (LPBYTE) &speed, &data_size
         );
 
         if (result == BENJI_NO_ERROR && data_type == REG_DWORD) {

@@ -236,5 +236,5 @@ result_t* gpu_info_to_map(gpu_info_t gpu_info) {
 
     free(buffer);
 
-    return gpu_info_map;
+    return result_success(gpu_info_map);
 }
