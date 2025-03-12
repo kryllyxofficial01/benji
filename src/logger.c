@@ -59,7 +59,7 @@ void log_warning(result_error_payload_t error) {
 
     sprintf(
         output,
-        ANSI_YELLOW "[FATAL] %s:%i under %s() -> %s (%i)\n" ANSI_COLOR_RESET,
+        ANSI_YELLOW "[WARNING] %s:%i under %s() -> %s (%i)\n" ANSI_COLOR_RESET,
         error.location.file_name,
         error.location.lineno,
         error.location.function_name,
