@@ -324,5 +324,5 @@ BENJIAPI result_t* server_send_to_client(BENJI_SOCKET client_socket, const char*
 }
 
 size_t server_parse_client_data(const char* client_data, char*** data_groups) {
-    return splitstr(client_data, data_groups, ';');
+    return strsplit(client_data, data_groups, ';');
 }
