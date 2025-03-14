@@ -140,7 +140,7 @@ void strtrim(char* string);
 size_t strsplit(const char* string, char*** tokens, const char character); // returns token count
 
 #ifdef _WIN32
-    char* wcharp_to_charp(const WCHAR* wchar);
+    char* wcharp_to_charp(const wchar_t* wchar);
 #endif
 
 #endif
