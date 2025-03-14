@@ -5,6 +5,11 @@
     #define BENJI_USE_SYS_INFO_UTILS
 #endif
 
+#pragma comment(lib, "wbemuuid.lib")
+
+#include <wbemidl.h>
+#include <comdef.h>
+
 #include "../utils.h"
 
 #ifndef BENJI_GPU_VENDOR_INTEL
