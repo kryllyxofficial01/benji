@@ -3,27 +3,170 @@
 result_t* get_gpu_info() {
     gpu_info_t* info = malloc(sizeof(gpu_info_t));
 
-    result_t* gpu_name_result = get_gpu_name();
-    return_if_error(gpu_name_result);
-    info->name = strdup((char*) result_unwrap_value(gpu_name_result));
-    strtrim(info->name);
+    // result_t* gpu_name_result = get_gpu_name();
+    // return_if_error(gpu_name_result);
+    // info->name = strdup((char*) result_unwrap_value(gpu_name_result));
+    // strtrim(info->name);
 
-    result_t* gpu_vendor_result = get_gpu_vendor();
-    return_if_error(gpu_vendor_result);
-    info->vendor = strdup((char*) result_unwrap_value(gpu_vendor_result));
-    strtrim(info->vendor);
+    // result_t* gpu_vendor_result = get_gpu_vendor();
+    // return_if_error(gpu_vendor_result);
+    // info->vendor = strdup((char*) result_unwrap_value(gpu_vendor_result));
+    // strtrim(info->vendor);
 
-    result_t* gpu_dedicated_video_memory_result = get_gpu_dedicated_video_memory();
-    return_if_error(gpu_dedicated_video_memory_result);
-    info->dedicated_video_memory = *(double*) result_unwrap_value(gpu_dedicated_video_memory_result);
+    // result_t* gpu_dedicated_video_memory_result = get_gpu_dedicated_video_memory();
+    // return_if_error(gpu_dedicated_video_memory_result);
+    // info->dedicated_video_memory = *(double*) result_unwrap_value(gpu_dedicated_video_memory_result);
 
-    result_t* gpu_dedicated_system_memory_result = get_gpu_dedicated_system_memory();
-    return_if_error(gpu_dedicated_system_memory_result);
-    info->dedicated_system_memory = *(double*) result_unwrap_value(gpu_dedicated_system_memory_result);
+    // result_t* gpu_dedicated_system_memory_result = get_gpu_dedicated_system_memory();
+    // return_if_error(gpu_dedicated_system_memory_result);
+    // info->dedicated_system_memory = *(double*) result_unwrap_value(gpu_dedicated_system_memory_result);
 
-    result_t* gpu_shared_system_memory_result = get_gpu_shared_system_memory();
-    return_if_error(gpu_shared_system_memory_result);
-    info->shared_system_memory = *(double*) result_unwrap_value(gpu_shared_system_memory_result);
+    // result_t* gpu_shared_system_memory_result = get_gpu_shared_system_memory();
+    // return_if_error(gpu_shared_system_memory_result);
+    // info->shared_system_memory = *(double*) result_unwrap_value(gpu_shared_system_memory_result);
+
+    HRESULT hresult;
+
+    hresult = CoInitializeEx(0, COINIT_MULTITHREADED);
+    if (FAILED(hresult)) {
+        return result_error(hresult, "CoInitializeEx() failed", BENJI_ERROR_PACKET);
+    }
+
+    hresult = CoInitializeSecurity(
+        NULL, -1, NULL, NULL,
+        RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
+        NULL, EOAC_NONE, NULL
+    );
+    if (FAILED(hresult)) {
+        CoUninitialize();
+
+        return result_error(hresult, "CoInitializeSecurity() failed", BENJI_ERROR_PACKET);
+    }
+
+    IWbemLocator* locater = NULL;
+
+    hresult = CoCreateInstance(
+        &CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
+        &IID_IWbemLocator, (void*) &locater
+    );
+    if (FAILED(hresult)) {
+        CoUninitialize();
+
+        return result_error(hresult, "CoCreateInstance() failed", BENJI_ERROR_PACKET);
+    }
+
+    IWbemServices* services = NULL;
+
+    hresult = locater->lpVtbl->ConnectServer(
+        locater, SysAllocString(TEXT("ROOT\\CIMV2")),
+        NULL, NULL, NULL, 0, NULL, NULL, &services
+    );
+    if (FAILED(hresult)) {
+        locater->lpVtbl->Release(locater);
+
+        CoUninitialize();
+
+        return result_error(hresult, "ConnectServer() failed", BENJI_ERROR_PACKET);
+    }
+
+    hresult = CoSetProxyBlanket(
+        (IUnknown*) services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
+        RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE
+    );
+    if (FAILED(hresult)) {
+        services->lpVtbl->Release(services);
+        locater->lpVtbl->Release(locater);
+
+        CoUninitialize();
+
+        return result_error(hresult, "CoSetProxyBlanket() failed", BENJI_ERROR_PACKET);
+    }
+
+    IEnumWbemClassObject* enumerator = NULL;
+
+    // gpu name, vendor, and dedicated video memory
+    hresult = services->lpVtbl->ExecQuery(
+        services, SysAllocString(TEXT("WQL")),
+        SysAllocString(TEXT("SELECT Name, Manufacturer, AdapterRAM, DedicatedSystemMemory, SharedSystemMemory FROM Win32_VideoController")),
+        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator
+    );
+    if (FAILED(hresult) || !enumerator) {
+        services->lpVtbl->Release(services);
+        locater->lpVtbl->Release(locater);
+
+        CoUninitialize();
+
+        return result_error(hresult, "ExecQuery() failed", BENJI_ERROR_PACKET);
+    }
+
+    IWbemClassObject* class_object = NULL;
+    unsigned long return_value = 0;
+
+    if (enumerator->lpVtbl->Next(enumerator, WBEM_INFINITE, 1, &class_object, &return_value) == (HRESULT) BENJI_NO_ERROR) {
+        VARIANT variant_prop;
+
+        // gpu name
+        hresult = class_object->lpVtbl->Get(class_object, TEXT("Name"), 0, &variant_prop, 0, 0);
+        if (SUCCEEDED(hresult)) {
+            info->name = wcharp_to_charp(variant_prop.bstrVal);
+        }
+        else {
+            info->name = "???";
+        }
+
+        VariantClear(&variant_prop);
+
+        // vendor
+        hresult = class_object->lpVtbl->Get(class_object, TEXT("Manufacturer"), 0, &variant_prop, 0, 0);
+        if (SUCCEEDED(hresult)) {
+            info->vendor = wcharp_to_charp(variant_prop.bstrVal);
+        }
+        else {
+            info->vendor = "???";
+        }
+
+        VariantClear(&variant_prop);
+
+        // dedicated video memory
+        hresult = class_object->lpVtbl->Get(class_object, TEXT("AdapterRAM"), 0, &variant_prop, 0, 0);
+        if (SUCCEEDED(hresult) && variant_prop.vt != VT_NULL) {
+            info->dedicated_video_memory = (double) variant_prop.ulVal / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            info->dedicated_video_memory = -1.0;
+        }
+
+        VariantClear(&variant_prop);
+
+        // dedicated system memory
+        hresult = class_object->lpVtbl->Get(class_object, TEXT("DedicatedSystemMemory"), 0, &variant_prop, 0, 0);
+        if (SUCCEEDED(hresult) && variant_prop.vt != VT_NULL) {
+            info->dedicated_system_memory = (double) variant_prop.ulVal / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            info->dedicated_system_memory = -1.0;
+        }
+
+        // shared system memory
+        hresult = class_object->lpVtbl->Get(class_object, TEXT("SharedSystemMemory"), 0, &variant_prop, 0, 0);
+        if (SUCCEEDED(hresult) && variant_prop.vt != VT_NULL) {
+            info->shared_system_memory = (double) variant_prop.ulVal / (1024.0 * 1024.0 * 1024.0);
+        }
+        else {
+            info->shared_system_memory = -1.0;
+        }
+
+        VariantClear(&variant_prop);
+
+        class_object->lpVtbl->Release(class_object);
+    }
+    else {
+        enumerator->lpVtbl->Release(enumerator);
+
+        result_error(-1, "Unable to collect GPU information", BENJI_ERROR_PACKET);
+    }
+
+    enumerator->lpVtbl->Release(enumerator);
 
     return result_success(info);
 }
@@ -144,17 +287,17 @@ result_t* get_gpu_shared_system_memory() {
 
 #ifdef _WIN32
     result_t* get_gpu_description() {
-        HRESULT result = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+        HRESULT hresult = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-        if (FAILED(result)) {
-            return result_error(result, "CoInitializeEx() failed", BENJI_ERROR_PACKET);
+        if (FAILED(hresult)) {
+            return result_error(hresult, "CoInitializeEx() failed", BENJI_ERROR_PACKET);
         }
 
         IDXGIFactory* factory = NULL;
-        result = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
+        hresult = CreateDXGIFactory(&IID_IDXGIFactory, (void**) &factory);
 
-        if (FAILED(result)) {
-            return result_error(result, "CreateDXGIFactory() failed", BENJI_ERROR_PACKET);
+        if (FAILED(hresult)) {
+            return result_error(hresult, "CreateDXGIFactory() failed", BENJI_ERROR_PACKET);
         }
 
         IDXGIAdapter* primary_adapter = NULL;
@@ -169,11 +312,11 @@ result_t* get_gpu_shared_system_memory() {
         while (factory->lpVtbl->EnumAdapters(factory, index, &adapter) != DXGI_ERROR_NOT_FOUND) {
             IDXGIOutput* output = NULL;
 
-            if ((result = adapter->lpVtbl->EnumOutputs(adapter, 0, &output)) == S_OK) {
+            if ((hresult = adapter->lpVtbl->EnumOutputs(adapter, 0, &output)) == S_OK) {
                 DXGI_OUTPUT_DESC output_description;
-                result = output->lpVtbl->GetDesc(output, &output_description);
+                hresult = output->lpVtbl->GetDesc(output, &output_description);
 
-                if (SUCCEEDED(result) && output_description.AttachedToDesktop) {
+                if (SUCCEEDED(hresult) && output_description.AttachedToDesktop) {
                     primary_adapter = adapter;
                     primary_adapter->lpVtbl->AddRef(primary_adapter);
 
@@ -182,13 +325,13 @@ result_t* get_gpu_shared_system_memory() {
                     break;
                 }
                 else {
-                    return result_error(result, "GetDesc() failed", BENJI_ERROR_PACKET);
+                    return result_error(hresult, "GetDesc() failed", BENJI_ERROR_PACKET);
                 }
 
                 output->lpVtbl->Release(output);
             }
             else {
-                return result_error(result, "EnumOutputs() failed", BENJI_ERROR_PACKET);
+                return result_error(hresult, "EnumOutputs() failed", BENJI_ERROR_PACKET);
             }
 
             adapter->lpVtbl->Release(adapter);
@@ -196,10 +339,10 @@ result_t* get_gpu_shared_system_memory() {
             index++;
         }
 
-        result = primary_adapter->lpVtbl->GetDesc(primary_adapter, primary_adapter_description);
+        hresult = primary_adapter->lpVtbl->GetDesc(primary_adapter, primary_adapter_description);
 
         if (primary_adapter == NULL) {
-            return result_error(result, "GetDesc() failed", BENJI_ERROR_PACKET);
+            return result_error(hresult, "GetDesc() failed", BENJI_ERROR_PACKET);
         }
 
         primary_adapter->lpVtbl->Release(primary_adapter);
